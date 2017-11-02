@@ -20,7 +20,7 @@ module.exports = {//注意这里是exports不是export
     devServer: {
         contentBase: path.join(__dirname, "build"),
         compress: true,
-        port: 8080,
+        port: 8081,
         hot:true,
         inline:true,
         progress:true,
