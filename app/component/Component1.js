@@ -15,41 +15,33 @@ class Component1 extends React.Component {
     }
 
     componentWillMount() {
-        ajax.get("https://api.github.com/repos/facebook/react/commits").end((error, response) => {
-            if (!error && response) {
-                this.setState({commits: response.body});
-            } else {
-                console.log("error :", error)
-            }
-        });
-        ajax.get('https://api.github.com/repos/facebook/react/forks')
+
+        this.fetchFeed('commits')
+        this.fetchFeed('forks')
+        this.fetchFeed('pulls')
+    }
+
+    fetchFeed(type) {
+        ajax.get(`https://api.github.com/repos/facebook/react/${type}`)
             .end((error, response) => {
                 if (!error && response) {
-                    this.setState({forks: response.body});
+                    this.setState({[type]: response.body});
                 } else {
-                    console.log("error :", error);
-                }
-            });
-        ajax.get('https://api.github.com/repos/facebook/react/pulls')
-            .end((error, response) => {
-                if (!error && response) {
-                    this.setState({pulls: response.body});
-                } else {
-                    console.log("error :", error);
+                    console.log(`Error fetching ${type}`, error);
                 }
             });
     }
 
     showCommits() {
-        this.setState({mode:'commits'});
+        this.setState({mode: 'commits'});
     }
 
     showForks() {
-        this.setState({mode:'forks'});
+        this.setState({mode: 'forks'});
     }
 
     showPulls() {
-        this.setState({mode:'pulls'});
+        this.setState({mode: 'pulls'});
     }
 
     renderCommits() {
