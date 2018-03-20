@@ -31,6 +31,9 @@ class Component1 extends React.Component {
                 }
             });
     }
+    selectMode(mode){
+        this.setState({mode});
+    }
 
     showCommits() {
         this.setState({mode: 'commits'});
@@ -93,9 +96,9 @@ class Component1 extends React.Component {
         return (
             <div>
                 <p>恭喜老二跑通react+webpack+babel+webpack-server-dev!!!</p>
-                <button onClick={this.showCommits.bind(this)}>Show Commits</button>
-                <button onClick={this.showForks.bind(this)}>Show Forks</button>
-                <button onClick={this.showPulls.bind(this)}>Show Pulls</button>
+                <button onClick={this.selectMode.bind(this,'commits')}>Show Commits</button>
+                <button onClick={this.selectMode.bind(this,'forks')}>Show Forks</button>
+                <button onClick={this.selectMode.bind(this,'pulls')}>Show Pulls</button>
                 {content}
             </div>
 
