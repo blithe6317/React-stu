@@ -1,6 +1,7 @@
 //Component1.jsx
 import React from 'react';
 import ajax from 'superagent';
+import {Link,NavLink} from 'react-router-dom';
 
 class Component1 extends React.Component {
     constructor(props) {
@@ -22,7 +23,8 @@ class Component1 extends React.Component {
     }
 
     fetchFeed(type) {
-        ajax.get(`https://api.github.com/repos/facebook/react/${type}`)
+        const baseURL = 'https://api.github.com/repos/facebook';
+        ajax.get(`${baseURL}/${this.props.match.params.repo}/${type}`)
             .end((error, response) => {
                 if (!error && response) {
                     this.setState({[type]: response.body});
@@ -33,18 +35,6 @@ class Component1 extends React.Component {
     }
     selectMode(mode){
         this.setState({mode});
-    }
-
-    showCommits() {
-        this.setState({mode: 'commits'});
-    }
-
-    showForks() {
-        this.setState({mode: 'forks'});
-    }
-
-    showPulls() {
-        this.setState({mode: 'pulls'});
     }
 
     renderCommits() {
@@ -95,14 +85,22 @@ class Component1 extends React.Component {
         }
         return (
             <div>
+                <p>
+                    You are here :<NavLink to="/" activeClassName="active">Home</NavLink>
+                    {this.props.match.params.repo}
+                </p>
+                <ul>
+                    <li><Link to='/'>list</Link></li>
+                </ul>
                 <p>恭喜老二跑通react+webpack+babel+webpack-server-dev!!!</p>
-                <button onClick={this.selectMode.bind(this,'commits')}>Show Commits</button>
-                <button onClick={this.selectMode.bind(this,'forks')}>Show Forks</button>
-                <button onClick={this.selectMode.bind(this,'pulls')}>Show Pulls</button>
+                <button onClick={this.selectMode.bind(this, 'commits')}>Show Commits</button>
+                <button onClick={this.selectMode.bind(this, 'forks')}>Show Forks</button>
+                <button onClick={this.selectMode.bind(this, 'pulls')}>Show Pulls</button>
                 {content}
             </div>
 
-        )
+        );
+
     }
 }
 
