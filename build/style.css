@@ -1,14 +1,3 @@
-body {
-    line-height: 1.428571429;
-    font-family: sans-serif;
-}
-
-h1 {
-    font-weight: 100;
-    font-size: 250%;
-    margin-bottom: 0;
-    color: #0275d8;
-}
 
 a {
     color: #0275d8;
@@ -34,4 +23,16 @@ button {
 
 button:active {
     background-color: #dcdcdc;
+}
+
+.app .search-bar{
+     width: 80%;
+     margin:50px 10%;
+ }
+.app .search-bar .btn-search{
+     width: 120px;
+    float: right;
+ }
+.app .search-bar .input-search{
+    margin-right: 130px;
 }
