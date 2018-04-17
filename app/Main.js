@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Login from 'login/index';
+import Login from 'login/Login';
 
 class Main extends React.Component {
     constructor(props) {
