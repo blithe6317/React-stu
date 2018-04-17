@@ -1,7 +1,8 @@
 import React from 'react';
 
-class Login extends React.Component {
+import Login from 'login/index';
 
+class Main extends React.Component {
     constructor(props) {
         super(props);
     }
@@ -9,10 +10,10 @@ class Login extends React.Component {
     render() {
         return (
             <div>
-                <p>这是一个登陆页面</p>
+                <Login/>
             </div>
         );
     }
 }
 
-export default Login;
+export default Main;

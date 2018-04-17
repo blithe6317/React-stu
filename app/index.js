@@ -3,10 +3,11 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 
-import App from './components/App';
+import Main from 'main';
+
 
 
 ReactDom.render(
-    <App url="comments.json"/>,
+    <Main/>,
     document.getElementById('app')
 )
