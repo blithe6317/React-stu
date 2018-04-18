@@ -1,4 +1,5 @@
 
+
 a {
     color: #0275d8;
     text-decoration: none;
@@ -26,13 +27,13 @@ button:active {
 }
 
 .app .search-bar{
-     width: 80%;
-     margin:50px 10%;
- }
+    width: 80%;
+    margin:50px 10%;
+}
 .app .search-bar .btn-search{
-     width: 120px;
+    width: 120px;
     float: right;
- }
+}
 .app .search-bar .input-search{
     margin-right: 130px;
 }
