@@ -50,9 +50,8 @@ function initView() {
         }
         if ($item.attr('has') == 'has') {
             addXYCover(id, w);
-        } else {
-            findNum(num, id, w);
         }
+        findNum(num, id, w);
         addCover(id, w);
     });
 }
@@ -63,7 +62,7 @@ function findNum(num, id, w) {
         var tid = $(list[i]).attr('id');
         var span = $(list[i]).find('span');
 
-        if (span && span.text() == num && tid != id) {
+        if (span && span.text() && span.text() == num && tid != id) {
             var html = `<div class='same-cover' style="width:${w}px;height:${w}px;"></div>`;
             $(list[i]).append(html);
         }
@@ -99,14 +98,18 @@ function addCover(id, w) {
 
 }
 function addNum(num) {
+    var _w = $('#sudo').width(), w = _w / 9 - 4;
     var cover = $('#sudo td.item .cover');
     if (cover.length <= 0) {
         return;
     }
     var par = cover.parent('td.item');
+    var id = par.attr('id');
     if (par.attr('has') == 'has') {
         par.find('span').text(num);
     }
+
+    findNum(num, id, w);
 }
 
 function deleteNum() {
