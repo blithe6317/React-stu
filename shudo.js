@@ -187,7 +187,7 @@ function getAllArr() {
  * @param 行数
  */
 
-function getXArr(x, type) {
+function getXArr(x, type, arr) {
     let arry = [],
         xStr = '',
         xArr = [],
@@ -222,7 +222,12 @@ function getXArr(x, type) {
             if (type && type == 'id') {
                 arry.push(xArr[i] + '' + yArr[j])
             } else {
-                arry.push(sudo[xArr[i]][yArr[j]])
+                if (arr) {
+                    arry.push(parseInt(arr[xArr[i]][yArr[j]]))
+                } else {
+                    arry.push(sudo[xArr[i]][yArr[j]])
+                }
+                // arry.push(sudo[xArr[i]][yArr[j]])
             }
         }
     }
@@ -235,7 +240,7 @@ function getXArr(x, type) {
  */
 
 
-function getYArr(y, type) {
+function getYArr(y, type, arr) {
     let arry = [],
         xStr = '',
         xArr = [],
@@ -270,7 +275,11 @@ function getYArr(y, type) {
             if (type && type == 'id') {
                 arry.push(xArr[i] + '' + yArr[j])
             } else {
-                arry.push(sudo[xArr[i]][yArr[j]])
+                if (arr) {
+                    arry.push(parseInt(arr[xArr[i]][yArr[j]]))
+                } else {
+                    arry.push(sudo[xArr[i]][yArr[j]])
+                }
             }
         }
     }
@@ -279,7 +288,10 @@ function getYArr(y, type) {
 /**
  * 获取一个宫格的数组
  */
-function getBoxArr(x) {
+function getBoxArr(x, arr) {
+    if (arr) {
+        return arr[x];
+    }
     return sudo[x];
 }
 
@@ -485,7 +497,7 @@ function checkSudu() {
     for (var i = 0; i < arr.length; i++) {
         for (var j = 0; j < arr[i].length; j++) {
             var id = i + '' + j;
-            var pArr = getPossibleArryByXy(id);
+            var pArr = getPTWOArr(id, arr);
             if (pArr.length > 0) {
                 flag = true;
                 return alert('哟哟哟！错了吧');
@@ -493,4 +505,33 @@ function checkSudu() {
         }
     }
     return alert('nice!你作对了！%%')
+}
+
+function getPTWOArr(xy, arr) {
+    xy = xy + '';
+    var xA = parseInt(xy.split('')[0]),
+        yA = parseInt(xy.split('')[1]);
+    let farr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+    var x = Math.floor(xA / 3) * 3 + Math.floor(yA / 3),
+        y = xA % 3 * 3 + yA % 3,
+        xArr = getXArr(x, null, arr),
+        yArr = getYArr(y, null, arr),
+        boxArr = getBoxArr(xA, arr),
+        oldArr = xArr.concat(yArr).concat(boxArr),
+        newArr = [];
+    for (let i = 0; i < oldArr.length; i++) {
+        if (newArr.length <= 0 && oldArr[i]) {
+            newArr.push(parseInt(oldArr[i]));
+        } else {
+            if (newArr.indexOf(parseInt(oldArr[i])) < 0 && oldArr[i]) {
+                newArr.push(parseInt(oldArr[i]));
+            }
+        }
+    }
+    var pArr = farr.filter(i => {
+        return newArr.indexOf(i) < 0;
+    });
+    return pArr;
+
 }
