@@ -1,24 +1,93 @@
 var sudo = [[], [], [], [], [], [], [], [], []];
 var pSudo;
-var time;
+var time, level = 1;
 
 $(function () {
-    initView();
-    sudo = [[], [], [], [], [], [], [], [], []];
-    getAllArr();
-    showArr(sudo);
-    var isOver = setEmptyValue();
+    refresh();
 });
+
+function refresh() {
+    count = 0;
+    allCount = 0;
+    isOver = false;
+    sudo = [[], [], [], [], [], [], [], [], []];
+    initView();
+    getAllArr();
+    setEmptyValue();
+}
 
 function initView() {
     var _w = $('#sudo').width();
+    var list = $('#sudo').find('td.item');
+    for (var i = 0; i < list.length; i++) {
+        $(list[i]).removeAttr('has', '');
+        $(list[i]).find('.xy-cover').remove();
+        $(list[i]).find('.cover').remove();
+        $(list[i]).find('.same-cover').remove();
+        $(list[i]).find('span').remove();
+    }
     $('#sudo').height(_w);
     $('#sudo td.item').width(_w / 9 - 4);
     $('#sudo td.item').height(_w / 9 - 4);
+    $('#sudo td.item').unbind('click');
     $('#sudo td.item').on('click', function (e) {
-        
-        addCover($(e.target).attr('id'), _w / 9 - 4);
+        var $item;
+        if (!$(e.target).hasClass('item')) {
+            $item = $(e.target).parent('.item');
+        } else {
+            $item = $(e.target);
+        }
+        var list = $('#sudo').find('td.item');
+        for (var i = 0; i < list.length; i++) {
+            $(list[i]).find('.xy-cover').remove();
+            $(list[i]).find('.cover').remove();
+            $(list[i]).find('.same-cover').remove();
+        }
+
+        var id = $item.attr('id'), w = _w / 9 - 4, num;
+        if ($item.find('span')) {
+            num = $item.find('span').text();
+        }
+        if ($item.attr('has') == 'has') {
+            addXYCover(id, w);
+        } else {
+            findNum(num, id, w);
+        }
+        addCover(id, w);
     });
+}
+
+function findNum(num, id, w) {
+    var list = $('#sudo').find('td.item');
+    for (var i = 0; i < list.length; i++) {
+        var tid = $(list[i]).attr('id');
+        var span = $(list[i]).find('span');
+
+        if (span && span.text() == num && tid != id) {
+            var html = `<div class='same-cover' style="width:${w}px;height:${w}px;"></div>`;
+            $(list[i]).append(html);
+        }
+    }
+}
+function addXYCover(id, w) {
+
+    var xA = parseInt(id.split('')[0]),
+        yA = parseInt(id.split('')[1]);
+
+    var x = Math.floor(xA / 3) * 3 + Math.floor(yA / 3),
+        y = xA % 3 * 3 + yA % 3,
+        xArr = getXArr(x, 'id'),
+        yArr = getYArr(y, 'id');
+    for (var i = 0; i < xArr.length; i++) {
+        if (xArr[i] != id || yArr[i] != id) {
+            addXYCoverById(xArr[i], w);
+            addXYCoverById(yArr[i], w);
+        }
+    }
+}
+function addXYCoverById(id, w) {
+    var html = `<div class='xy-cover' style="width:${w}px;height:${w}px;"></div>`;
+    $('#' + id).append(html);
 }
 /**
  * 给某个id上添加一个涂层
@@ -26,18 +95,33 @@ function initView() {
 function addCover(id, w) {
     var html = `<div class='cover' style="width:${w}px;height:${w}px;"></div>`;
     $('#sudo td.item .cover').remove();
-	$('#'+id).append(html);
+    $('#' + id).append(html);
 
 }
-function addNum(num){
-	var cover = $('#sudo td.item .cover');
-	if(cover.length<=0){
-		return ;
-	}
-	var par =cover.parent('td.item');
-	if(par.attr('has')=='has'){
-	   par.find('span').text(num);
-	}
+function addNum(num) {
+    var cover = $('#sudo td.item .cover');
+    if (cover.length <= 0) {
+        return;
+    }
+    var par = cover.parent('td.item');
+    if (par.attr('has') == 'has') {
+        par.find('span').text(num);
+    }
+}
+
+function deleteNum() {
+    var cover = $('#sudo td.item .cover');
+    if (cover.length <= 0) {
+        return;
+    }
+    var par = cover.parent('td.item');
+    if (par.attr('has') == 'has') {
+        par.find('span').text('');
+    }
+}
+function levelChange(e) {
+    level = $(e).val();
+    refresh();
 }
 /**
  * 遍历sudo获取第一个无值的id
@@ -57,9 +141,7 @@ function getFirstEmptyId() {
  */
 function showArr(arr) {
     var list = $('#sudo').find('td.item');
-    for (var i = 0; i < list.length; i++) {
-        $(list[i]).text('');
-    }
+
     for (let i = 0; i < 9; i++) {
         var a = arr[i];
         if (a && a.length > 0) {
@@ -100,7 +182,7 @@ function getAllArr() {
  * @param 行数
  */
 
-function getXArr(x) {
+function getXArr(x, type) {
     let arry = [],
         xStr = '',
         xArr = [],
@@ -132,7 +214,11 @@ function getXArr(x) {
     yArr = yStr.split('');
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
-            arry.push(sudo[xArr[i]][yArr[j]])
+            if (type && type == 'id') {
+                arry.push(xArr[i] + '' + yArr[j])
+            } else {
+                arry.push(sudo[xArr[i]][yArr[j]])
+            }
         }
     }
     return arry;
@@ -144,7 +230,7 @@ function getXArr(x) {
  */
 
 
-function getYArr(y) {
+function getYArr(y, type) {
     let arry = [],
         xStr = '',
         xArr = [],
@@ -176,7 +262,11 @@ function getYArr(y) {
     yArr = yStr.split('');
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
-            arry.push(sudo[xArr[i]][yArr[j]])
+            if (type && type == 'id') {
+                arry.push(xArr[i] + '' + yArr[j])
+            } else {
+                arry.push(sudo[xArr[i]][yArr[j]])
+            }
         }
     }
     return arry;
@@ -265,8 +355,7 @@ function setEmptyValue(id, index) {
         isOver = true;
         allCount++;
         log(count, allCount);
-        randomHideSudo();
-        // showArr(sudo);
+        randomHideSudo(level);
         return 'over';
     }
     var xA = id.split('')[0],
@@ -316,12 +405,12 @@ function setEmptyValue(id, index) {
  */
 function randomHideSudo(level) {
     level = level ? level : 1;
-    if (level > 3) {
+    if (level > 5) {
         return alert('欸！往回退一步！');
     }
     var hideArr = [],
         showSudo = sudo.concat([]),
-        levelLength = 17 + Math.abs(level - 3) * 4,
+        levelLength = 17 + Math.abs(level - 5) * 4,
         hideLength = 81 - levelLength;
     for (var i = 0; i < hideLength; i++) {
         var flag = true, xA, yA, id;
@@ -335,9 +424,8 @@ function randomHideSudo(level) {
                 showSudo[xA][yA] = '';
             }
         }
-
     }
-    console.log('showSudo:', showSudo);
+    // console.log('showSudo:', showSudo);
     showHeidSudo(showSudo);
 }
 /**
