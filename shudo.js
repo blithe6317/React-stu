@@ -1,5 +1,5 @@
 var sudo = [[], [], [], [], [], [], [], [], []];
-var pSudo;
+var pSudo = [[], [], [], [], [], [], [], [], []];
 var time, level = 1;
 
 $(function () {
@@ -126,6 +126,9 @@ function levelChange(e) {
     level = $(e).val();
     refresh();
 }
+function again() {
+    showHeidSudo(pSudo);
+}
 /**
  * 遍历sudo获取第一个无值的id
  */
@@ -177,7 +180,6 @@ function getAllArr() {
     for (let i = 0; i < sudo.length; i++) {
         sudo[i].length = 9;
     }
-    pSudo = JSON.stringify(sudo);
 }
 
 /**
@@ -450,6 +452,7 @@ function showHeidSudo(arr) {
                 if (arr[i][j] === '') {
                     parent.attr('has', 'has');
                 }
+                pSudo[i][j] = arr[i][j];
                 parent.html(html);
             }
         }
