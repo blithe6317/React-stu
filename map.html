@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+        body,
+        html,
+        #allmap {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            margin: 0;
+            font-family: "微软雅黑";
+        }
+
+        #l-map {
+            height: 100%;
+            width: 78%;
+            float: left;
+            border-right: 2px solid #bcbcbc;
+        }
+
+        #r-result {
+            height: 100%;
+            width: 20%;
+            float: left;
+        }
+    </style>
+    <script src="./jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=zeoVlbwj6mOY0uAIsGP1GcgogeRxxojK"></script>
+    <title>网点分布图</title>
+</head>
+
+<body>
+    <div id="allmap"></div>
+</body>
+
+</html>
+<script type="text/javascript">
+    // 百度地图API功能
+    var addressData = [
+        { id: "1", city: "苏州", area: "姑苏区", company: "百世快递", pointName: "园区三部", address: "苏州市吴中区郭巷街道后港路20号", linkman: "王兴伟", phone: "18914032855", curr_bad: "56", },
+        { id: "2", city: "苏州", area: "姑苏区", company: "百世快递", pointName: "金阊二部", address: "苏州金阊区留园街道西园路767号", linkman: "许继标", phone: "15151528110", curr_bad: "15", },
+        { id: "3", city: "苏州", area: "姑苏区", company: "百世快递", pointName: "平江八区", address: "苏州市姑苏区城北街道新塘工业区新星二路5号", linkman: "曹振", phone: "13862069069", curr_bad: "10", },
+        { id: "4", city: "苏州", area: "姑苏区", company: "百世快递", pointName: "园区跨塘分部", address: "苏州工业园区唯亭街道至和东路2号", linkman: "赵晓飞", phone: "14752523168", curr_bad: "10", },
+        { id: "5", city: "苏州", area: "姑苏区", company: "百世快递", pointName: "苏州姑苏区二部", address: "苏州市姑苏区劳动西路71-3号", linkman: "汪浩", phone: "15851661157", curr_bad: "7", },
+        { id: "6", city: "苏州", area: "吴中区", company: "百世快递", pointName: "吴中七部", address: "苏州吴中区长桥街道新门路16号", linkman: "潘林江", phone: "13372104579", curr_bad: "6", },
+        { id: "7", city: "苏州", area: "虎丘区", company: "百世快递", pointName: "新区一部", address: "苏州新区浒墅关镇浒关北路888号", linkman: "许志新", phone: "18605128366", curr_bad: "5", },
+        { id: "8", city: "苏州", area: "相城区", company: "百世快递", pointName: "苏州相城区四部", address: "苏州市相城区黄桥街道木巷警务室斜对面", linkman: "潘峰", phone: "15190080635", curr_bad: "5", },
+        { id: "9", city: "苏州", area: "相城区", company: "百世快递", pointName: "苏州相城蠡口分部", address: "苏州市相城元和街道国际服装A区12栋116号", linkman: "王海涛", phone: "18262002700", curr_bad: "4", },
+        { id: "10", city: "苏州", area: "相城区", company: "百世快递", pointName: "苏州黄埭分部", address: "苏州市相城区黄埭镇长泾街道西浜小区80栋744号", linkman: "方苏", phone: "18936143280", curr_bad: "4", },
+        { id: "11", city: "苏州", area: "姑苏区", company: "百世快递", pointName: "平江四区", address: "苏州市娄门街道北环东路挹秀新村3-1", linkman: "姜洪流", phone: "13862146722", curr_bad: "3", },
+        { id: "12", city: "苏州", area: "吴中区", company: "百世快递", pointName: "吴中八部", address: "苏州市吴中区临湖镇浦庄街道和安西路1045号", linkman: "戚志强", phone: "13218199518", curr_bad: "3", },
+        { id: "13", city: "苏州", area: "相城区", company: "百世快递", pointName: "苏州相城中翔分部", address: "苏州市相城区元和街道徐庄二村103号", linkman: "罗真梅", phone: "15250013306/13616203967", curr_bad: "3", },
+        { id: "14", city: "苏州", area: "虎丘区", company: "百世快递", pointName: "新区八部", address: "苏州市高新区金庄街28-2号7号厂房", linkman: "李军", phone: "18912776015", curr_bad: "1", },
+        { id: "15", city: "苏州", area: "姑苏区", company: "百世快递", pointName: "平江一区", address: "苏州平江区桃花坞街道曹家巷30号", linkman: "郭龙春", phone: "14752511198", curr_bad: "0", },
+        { id: "16", city: "苏州", area: "吴江区", company: "百世快递", pointName: "北厍分部", address: "苏州市吴江市北厍育才路328号 ", linkman: "王建军", phone: "13621567300/18962552956", curr_bad: "0", },
+        { id: "17", city: "苏州", area: "吴中区", company: "百世快递", pointName: "吴中十七部", address: "苏州市吴中区金庭镇公园东路137号", linkman: "刘朱", phone: "18934599299", curr_bad: "0", },
+        { id: "18", city: "苏州", area: "吴中区", company: "百世快递", pointName: "苏州吴中区二部", address: "苏州市吴中区横泾镇嘉盛花园南门", linkman: "邓邵松", phone: "15995855595", curr_bad: "0", "备注": "站点称没有拿到过天猫框" },
+        { id: "19", city: "苏州", area: "姑苏区", company: "百世快递", pointName: "平江三区", address: "苏州市姑苏区观前街道海红坊15号", linkman: "刘伟杰", phone: "18962186818/18913533053", curr_bad: "3", },
+        { id: "20", city: "苏州", area: "吴中区", company: "百世快递", pointName: "园区一部", address: "苏州园区莫邪路33号", linkman: "韩勇建", phone: "15358809136/18912776058", curr_bad: "0", "备注": "已关停" },
+        { id: "21", city: "苏州", area: "吴中区", company: "百世快递", pointName: "园区四部", address: "苏州工业园区娄葑北区杨东路277号", linkman: "张成坤", phone: "18912776039", curr_bad: "0", "备注": "已关停" },
+        { id: "22", city: "苏州", area: "姑苏区", company: "百世快递", pointName: "园区六部", address: "苏州市工业园区唯亭镇新莆田民营区10—3", linkman: "常飞宇", phone: "13914033397", curr_bad: "4", },
+        { id: "23", city: "苏州", area: "姑苏区", company: "百世快递", pointName: "苏州新庄一部", address: "苏州姑苏区白洋湾街道洋南路26号" },
+
+        { id: "24", city: "苏州", area: "虎丘区", company: "百世快递", pointName: "新区四部", address: "苏州新区鹿山路85号南门", linkman: "辛立志", phone: "17706136080", curr_bad: "40", },
+        { id: "25", city: "苏州", area: "虎丘区", company: "百世快递", pointName: "苏州通安分部", address: "苏州市相城区望亭镇迎湖路2号", linkman: "薛龚", phone: "13506213721", curr_bad: "5", },
+        { id: "26", city: "苏州", area: "虎丘区", company: "百世快递", pointName: "苏州横塘分部", address: "苏州横塘街道科慧路1号", linkman: "王超", phone: "15162403355", curr_bad: "5", },
+        { id: "27", city: "苏州", area: "虎丘区", company: "百世快递", pointName: "苏州阳山分部", address: "苏州新区许关街道建林路802-8", linkman: "刘满", phone: "15850126517", curr_bad: "0", "备注": "关停" },
+        { id: "28", city: "苏州", area: "吴江区", company: "百世快递", pointName: "苏州平望分部", address: "苏州市吴江区平望镇运河路31号", linkman: "姚启平", curr_bad: "0", },
+        { id: "29", city: "苏州", area: "吴中区", company: "百世快递", pointName: "吴中六部", address: "苏州吴中区城南街道盛城路10-4号", linkman: "徐振", phone: "15950028954/18914068375", curr_bad: "15", },
+        { id: "30", city: "苏州", area: "吴中区", company: "百世快递", pointName: "吴中十二部", address: "苏州市吴中区木渎镇孙武路61号", linkman: "唐焕军", phone: "13656240991", curr_bad: "2", },
+        { id: "31", city: "苏州", area: "吴中区", company: "百世快递", pointName: "吴中十五部", address: "苏州吴中区木渎镇木东路24号", linkman: "唐小雷", phone: "15366203518/15862362605", curr_bad: "6", },
+        { id: "32", city: "苏州", area: "吴中区", company: "百世快递", pointName: "苏州吴中越溪", address: "苏州市吴中区越溪街道越溪镇旺山村26号", linkman: "张兴树", phone: "13255182038", curr_bad: "8", },
+        { id: "33", city: "苏州", area: "姑苏区", company: "百世快递", pointName: "苏州圆融分部", address: "苏州市姑苏区苏站路新天地家园77-404室", linkman: "陈磊", phone: "18912776560", curr_bad: "0", "备注": "关停" },
+        { id: "34", city: "苏州", area: "吴中区", company: "百世快递", pointName: "苏州吴中甪直分部", address: "苏州吴中区甪直镇育才路19号", linkman: "田学松", phone: "17715591386/17706250159", curr_bad: "0", "备注": "关停" },
+        { id: "35", city: "苏州", area: "相城区", company: "百世快递", pointName: "苏州相城北桥分部", address: "苏州市相城区北桥镇庄基村友胜路98号", linkman: "沈威", phone: "18551132521", curr_bad: "2", },
+        { id: "36", city: "苏州", area: "吴江区", company: "百世快递", pointName: "吴江水韵", address: "苏州市八坼镇吴江区友谊工业区内", linkman: "朱卫华", phone: "17715378868", curr_bad: "50", },
+        { id: "37", city: "苏州", area: "吴中区", company: "百世快递", pointName: "苏州园区胜浦分部", address: "苏州园区胜浦镇瑞祥广场1幢117号", linkman: "蒋帅帅", phone: "15962445676", curr_bad: "4", },
+        { id: "38", city: "苏州", area: "吴中区", company: "百世快递", pointName: "苏州园区斜塘分部", address: "苏州园区斜塘镇新发路1号", linkman: "油振国", phone: "13862425662", curr_bad: "5", },
+        { id: "39", city: "苏州", area: "吴中区", company: "百世快递", pointName: "吴中八部东山分部", address: "苏州市吴中区东山镇洞庭路8号", linkman: "任强强", phone: "15895678907", curr_bad: "2", },
+        { id: "40", city: "苏州", area: "相城区", company: "百世快递", pointName: "苏州相城区三部", address: "苏州相城区阳澄湖镇岸山警务室吴家浜201号", linkman: "铁牛", phone: "18761939781", curr_bad: "0", "备注": "已关停" },
+        { id: "41", city: "苏州", area: "新区", company: "申通", pointName: "新区工业园分部", address: "江苏省苏州市新区鹿山路369号环保产业园11-1楼", linkman: "严小飞", phone: "15371877777", curr_bad: "1", },
+        { id: "42", city: "苏州", area: "姑苏区", company: "申通", pointName: "三香分部", address: "江苏省苏州市姑苏区桐泾北路张家浜29号恒远创业园C2-C5", linkman: "张俭兴", phone: "15051599111", curr_bad: "8", },
+        { id: "43", city: "苏州", area: "姑苏区", company: "申通", pointName: "胥江路分部", address: "江苏省苏州市姑苏区胥江路235号", linkman: "杜鹏江", phone: "18015565873", curr_bad: "10", },
+        { id: "44", city: "苏州", area: "姑苏区", company: "申通", pointName: "苏锦分部", address: "江苏省苏州市姑苏区清塘路十字洋河交界处大观名园16幢5号车库", linkman: "侯国梁", phone: "13914008687", curr_bad: "3", },
+        { id: "45", city: "苏州", area: "姑苏区", company: "申通", pointName: "东中分部", address: "江苏省苏州市姑苏区人民路1585号旁边合村坊9号", linkman: "李建军", phone: "17798698713", curr_bad: "0", },
+        { id: "46", city: "苏州", area: "姑苏区", company: "申通", pointName: "平江分部", address: "江苏省苏州市姑苏区西北街公管弄20号", linkman: "杨  霖", phone: "17761866877", curr_bad: "3", },
+        { id: "47", city: "苏州", area: "姑苏区", company: "申通", pointName: "南园桥分部", address: "江苏省苏州市姑苏区南园北路168号", linkman: "陈平", phone: "15155600772", curr_bad: "8", },
+        { id: "48", city: "苏州", area: "姑苏区", company: "申通", pointName: "东大街分部", address: "江苏省苏州市姑苏区南采莲巷8号", linkman: "李亚军", phone: "18051108103", curr_bad: "2", },
+        { id: "49", city: "苏州", area: "相城区", company: "申通", pointName: "陆慕分部", address: "江苏省苏州市相城区春申湖中路299号", linkman: "张文友", phone: "1891350172", curr_bad: "0", },
+        { id: "50", city: "苏州", area: "相城区", company: "申通", pointName: "蠡口分部", address: "江苏省苏州市相城区蠡口镇如元路1288号", linkman: "王志远", phone: "18651117999", curr_bad: "1", },
+        { id: "51", city: "苏州", area: "相城区", company: "申通", pointName: "黄桥分部", address: "江苏省苏州市相城区黄桥镇永方路58号", linkman: "王晓鸣", phone: "15962263833", curr_bad: "5", },
+        { id: "52", city: "苏州", area: "吴中区", company: "申通", pointName: "木渎新华分部", address: "江苏省苏州市吴中区木渎镇香溪东路（朗诗绿色街区北门向西100米）", linkman: "谢晓龙", phone: "18951112795", curr_bad: "0", },
+        { id: "53", city: "苏州", area: "吴中区", company: "申通", pointName: "木渎金桥分部", address: "江苏省苏州市吴中区木渎镇金桥开发区雀梅东路22号", linkman: "袁广辉", phone: "13182675813", curr_bad: "2", },
+        { id: "54", city: "苏州", area: "相城区", company: "申通", pointName: "浒关分部", address: "江苏省苏州市相城区浒关镇中虹路20号", linkman: "郑立周", phone: "18913128410", curr_bad: "6", },
+        { id: "55", city: "苏州", area: "相城区", company: "申通", pointName: "望亭分部", address: "江苏省苏州市相城区问渡路567号", linkman: "姜广富", phone: "18112622555", curr_bad: "0", },
+        { id: "56", city: "苏州", area: "相城区", company: "申通", pointName: "黄埭分部", address: "江苏省苏州市相城区黄埭镇中市南路1号冠城水岸12-7号", linkman: "王  全", phone: "15862406618", curr_bad: "8", },
+        { id: "57", city: "苏州", area: "相城区", company: "申通", pointName: "渭塘分部", address: "江苏省苏州市相城区渭塘镇渭南路317号", linkman: "奚亚东", phone: "13706132261", curr_bad: "6", },
+        { id: "58", city: "苏州", area: "相城区", company: "申通", pointName: "北桥分部", address: "江苏省苏州市相城区北桥镇成美街", linkman: "余志意", phone: "13063883702", curr_bad: "4", },
+        { id: "59", city: "苏州", area: "工业园区", company: "申通", pointName: "永林分部", address: "江苏省苏州市工业园区东环路1645号东城明月7幢1号车库", linkman: "张跃", phone: "13915516376", curr_bad: "0", },
+        { id: "60", city: "苏州", area: "工业园区", company: "申通", pointName: "斜塘分部", address: "江苏省苏州市工业园区斜塘镇民生路88号", linkman: "夏肖鹏", phone: "17751119140", curr_bad: "4", },
+        { id: "61", city: "苏州", area: "工业园区", company: "申通", pointName: "独墅湖分部", address: "江苏省苏州市工业园区新泽路3号", linkman: "陈敬杯", phone: "13771805549", curr_bad: "7", },
+        { id: "62", city: "苏州", area: "工业园区", company: "申通", pointName: "车坊分部", address: "江苏省苏州市工业园区车坊淞泽家园3区41栋204车库", linkman: "王华雄", phone: "18662227920", curr_bad: "0", },
+        { id: "63", city: "苏州", area: "吴中区", company: "申通", pointName: "郭巷分部", address: "江苏省苏州市吴中区郭巷镇彩虹路66号", linkman: "邵贤海", phone: "18112527777", curr_bad: "3", },
+        { id: "64", city: "苏州", area: "工业园区", company: "申通", pointName: "胜浦分部", address: "江苏省苏州市工业园区胜浦镇通江路66号", linkman: "李连举", phone: "18601781674", curr_bad: "4", },
+        { id: "65", city: "苏州", area: "相城区", company: "申通", pointName: "沺泾分部", address: "江苏省苏州市相城区阳澄湖田泾管理区澄中路42号", linkman: "李春满", phone: "18206213357", curr_bad: "2", },
+        { id: "66", city: "苏州", area: "相城区", company: "申通", pointName: "阳澄湖分部", address: "江苏省苏州市相城区阳澄湖镇凤阳路238号", linkman: "张士明", phone: "13862076773", curr_bad: "2", },
+        { id: "67", city: "苏州", area: "工业园区", company: "申通", pointName: "唯亭北分部", address: "江苏省苏州市工业园区唯亭镇青苑商业广场东侧30号门面", linkman: "郑国强", phone: "18012620912", curr_bad: "1", },
+        { id: "68", city: "苏州", area: "工业园区", company: "申通", pointName: "跨塘南分部", address: "江苏省苏州市工业园区跨塘镇蠡唐路110号", linkman: "张德强", phone: "13771846883", curr_bad: "3", },
+        { id: "69", city: "苏州", area: "工业园区", company: "申通", pointName: "唯亭分部", address: "江苏省苏州市工业园区唯亭镇金陵西路188号财富中心1-111号", linkman: "胡云清", phone: "13306132406", curr_bad: "2", },
+        { id: "70", city: "苏州", area: "工业园区", company: "申通", pointName: "创投分部", address: "江苏省苏州市工业园区高浜新村10幢508室", linkman: "汪建勋", phone: "13862551747", curr_bad: "2", },
+        { id: "71", city: "苏州", area: "吴中区", company: "申通", pointName: "越溪厂区分部", address: "江苏省苏州市吴中区蓝缨学校斜对面", linkman: "陈勇", phone: "13771999825", curr_bad: "2", },
+        { id: "72", city: "苏州", area: "吴中区", company: "申通", pointName: "横泾分部", address: "江苏省苏州市吴中区横泾镇乐园北路11号", linkman: "梁亚飞", phone: "13812668350", curr_bad: "3", },
+        { id: "73", city: "苏州", area: "工业园区", company: "申通", pointName: "国际教育园分部", address: "江苏省苏州市园区国际教育园一川街文正三号北门交通银行旁边", linkman: "周  淼", phone: "13812627852", curr_bad: "3", },
+        { id: "74", city: "苏州", area: "吴中区", company: "申通", pointName: "浦庄分部", address: "江苏省苏州市吴中区浦庄镇和安路460号", linkman: "徐可玉", phone: "15366217599", curr_bad: "0", },
+        { id: "75", city: "苏州", area: "吴中区", company: "申通", pointName: "胥口分部", address: "江苏省苏州市吴中区胥口茅蓬路和石中路交叉路口建丰小区8号", linkman: "谭长伟", phone: "13013860172", curr_bad: "0", },
+        { id: "76", city: "苏州", area: "吴中区", company: "申通", pointName: "东山分部", address: "江苏省苏州市吴中区东山镇银湖路124号", linkman: "毛恭岳", phone: "18051108119", curr_bad: "2", },
+        { id: "77", city: "苏州", area: "吴中区", company: "申通", pointName: "渡村分部", address: "江苏省苏州市吴中区临湖镇渡村黄栌木东路358号", linkman: "陆爱梅", phone: "18767928628", curr_bad: "3", },
+        { id: "78", city: "苏州", area: "吴中区", company: "申通", pointName: "东福分部", address: "江苏省苏州市吴中区光福镇塔山路中国工艺文化城对面", linkman: "曹献宇", phone: "13771928567", curr_bad: "4", },
+        { id: "79", city: "苏州", area: "吴中区", company: "申通", pointName: "太湖度假区分部", address: "江苏省苏州市吴中太湖度假区蒋墩镇旅游职业学校对面", linkman: "陈海明", phone: "18862390696", curr_bad: "0", },
+        { id: "80", city: "苏州", area: "吴中区", company: "申通", pointName: "甪直南分部", address: "江苏省苏州市吴中区甪直镇长虹南路218号", linkman: "陈贤军", phone: "15862403630", curr_bad: "2", },
+        { id: "81", city: "苏州", area: "吴中区", company: "申通", pointName: "甪直北分部", address: "江苏省苏州市吴中区甪直镇凌港街18号", linkman: "唐孝康", phone: "13776114113", curr_bad: "0", },
+        { id: "82", city: "苏州", area: "工业园区", company: "申通", pointName: "苏安分部", address: "江苏省苏州市工业园区娄门路237号苏安新村1幢", linkman: "周建华", phone: "13616557860", curr_bad: "0", },
+        { id: "83", city: "苏州", area: "姑苏区", company: "申通", pointName: "苏大分部", address: "江苏省苏州市姑苏区相门后庄苏大学生公寓", linkman: "房磊", phone: "18962518080", curr_bad: "2", },
+        { id: "84", city: "苏州", area: "工业园区", company: "申通", pointName: "玲珑湾分部", address: "江苏省苏州市工业园区亿城左岸香颂5幢102商铺", linkman: "丁高峰", phone: "15190062300", curr_bad: "4", },
+        { id: "85", city: "苏州", area: "工业园区", company: "申通", pointName: "金鸡湖东分部", address: "江苏省苏州市工业园区苏虹东路155号7号楼1104", linkman: "杨  群", phone: "18260165995", curr_bad: "8", },
+        { id: "86", city: "苏州", area: "工业园区", company: "申通", pointName: "印象城分部", address: "江苏省苏州市工业园区娄门路237号里面仓库", linkman: "周建华", phone: "18951116382", curr_bad: "8", },
+        { id: "87", city: "苏州", area: "工业园区", company: "申通", pointName: "新苏分部", address: "江苏省苏州市工业园区杨枝新村62-2幢", linkman: "张露奇", phone: "18662163045", curr_bad: "6", },
+        { id: "88", city: "苏州", area: "工业园区", company: "申通", pointName: "娄葑分部", address: "江苏省苏州市工业园区金象城2-111号", linkman: "刘敬新", phone: "15162444411", curr_bad: "0", },
+        { id: "89", city: "苏州", area: "工业园区", company: "申通", pointName: "湖西分部", address: "江苏省苏州市工业园区莫邪路与庄先湾路交叉口向东500米", linkman: "张  跃", phone: "13915516376", curr_bad: "0", },
+        { id: "90", city: "苏州", area: "工业园区", company: "申通", pointName: "东兴分部", address: "江苏省苏州市工业园区东兴路92号", linkman: "刘桂保", phone: "18036820222", curr_bad: "6", },
+        { id: "91", city: "苏州", area: "姑苏区", company: "申通", pointName: "平江街道", address: "江苏省苏州市姑苏区金光路199号", linkman: "孙燕", phone: "18351106965", curr_bad: "3", },
+        { id: "92", city: "苏州", area: "相城区", company: "申通", pointName: "陆慕徐庄分部", address: "江苏省苏州市相城区陆慕镇徐庄一村86号", linkman: "陈齐总", phone: "18994306317", curr_bad: "2", },
+        { id: "93", city: "苏州", area: "姑苏区", company: "申通", pointName: "西环路分部", address: "江苏省苏州市姑苏区西环路三元二村78-108", linkman: "余  欣", phone: "18013196789", curr_bad: "2", },
+        { id: "94", city: "苏州", area: "吴中区", company: "申通", pointName: "木渎沈巷分部", address: "江苏省苏州市吴中区木渎镇沈巷村", linkman: "杨  军", phone: "18914088147", curr_bad: "4", },
+        { id: "95", city: "苏州", area: "姑苏区", company: "申通", pointName: "长青五金城分部", address: "江苏省苏州市姑苏区苏州市金阊礼品城D7-112", linkman: "鲍传开", phone: "13914096455", curr_bad: "5", },
+        { id: "96", city: "苏州", area: "工业园区", company: "申通", pointName: "斜塘莲花分部", address: "江苏省苏州市工业园区莲花商业街风暴飚歌城楼下第五家", linkman: "冯金良", phone: "18963268363", curr_bad: "2", },
+        { id: "97", city: "苏州", area: "吴中区", company: "申通", pointName: "西山分部", address: "江苏省苏州市吴中区西山金庭镇红桔街29-2号万家乐超市后面", linkman: "陈海亮", phone: "13584813615", curr_bad: "0", },
+        { id: "98", city: "苏州", area: "相城区", company: "申通", pointName: "太平分部", address: "江苏省苏州市相城区太平镇金澄广场六幢101室", linkman: "纪 方", phone: "18015510789", curr_bad: "7", },
+        { id: "99", city: "苏州", area: "新区", company: "申通", pointName: "江枫绿宝分部", address: "江苏省苏州市新区邓蔚路滨河花苑30栋仓库", linkman: "雷新城", phone: "18862300478", curr_bad: "3", },
+        { id: "100", city: "苏州", area: "新区", company: "申通", pointName: "新康佳分部", address: "江苏省苏州市新区马运路298号", linkman: "李  通", phone: "15306201260", curr_bad: "8", },
+        { id: "101", city: "苏州", area: "新区", company: "申通", pointName: "横塘赛格分部", address: "江苏省苏州市新区横塘幸福街134-6号", linkman: "范  鹏", phone: "13584890820", curr_bad: "5", },
+        { id: "102", city: "苏州", area: "新区", company: "申通", pointName: "乐园分部", address: "江苏省苏州市高新区向阳路150号", linkman: "许诺", phone: "15306134320", curr_bad: "2", },
+        { id: "103", city: "苏州", area: "相城区", company: "申通", pointName: "渭塘西分部", address: "江苏省苏州市相城区渭西菜市场好又多超市向西100米", linkman: "汪运富", phone: "15335288165", curr_bad: "2", },
+        { id: "104", city: "苏州", area: "相城区", company: "申通", pointName: "北桥东分部", address: "江苏省苏州市相城区北桥镇北丰南路12号往前100米", linkman: "杜国权", phone: "13222202991", curr_bad: "3", },
+        { id: "105", city: "苏州", area: "新区", company: "申通", pointName: "狮山路分部", address: "江苏省苏州市高新区滨河路创业大厦3号楼1楼", linkman: "汪文学", phone: "17715390819", curr_bad: "10", },
+        { id: "106", city: "苏州", area: "姑苏区", company: "申通", pointName: "姑香苑分部", address: "江苏省苏州市姑苏区劳动路1012号姑香新苑大门口", linkman: "郑振兴", phone: "18051108103", curr_bad: "2", },
+        { id: "107", city: "苏州", area: "工业园区", company: "申通", pointName: "独墅湖产业园分部", address: "江苏省苏州市工业园区新城路127号", linkman: "李加庆", phone: "13372102222", curr_bad: "2", },
+        { id: "108", city: "苏州", area: "工业园区", company: "申通", pointName: "淞泽分部", address: "江苏省苏州市工业园区淞泽家园2区20-106", linkman: "郭 芹", phone: "18120063854", curr_bad: "0", },
+        { id: "109", city: "苏州", area: "吴中区", company: "申通", pointName: "郭巷北分部", address: "江苏省苏州市吴中区通达路塘南新村南区11-2", linkman: "陈钦华", phone: "15000616895", curr_bad: "3", },
+        { id: "110", city: "苏州", area: "新区", company: "申通", pointName: "石湖校区分部", address: "江苏省苏州市新区横塘街道学府花苑12栋1号车库", linkman: "赵亮亮", phone: "15365380605", curr_bad: "3", },
+        { id: "111", city: "苏州", area: "工业园区", company: "申通", pointName: "跨塘北分部", address: "江苏省苏州市工业园区唯新路7号", linkman: "邓申洪", phone: "18551205668", curr_bad: "3", },
+        { id: "112", city: "苏州", area: "吴中区", company: "申通", pointName: "藏书分部", address: "江苏省苏州市吴中区藏北路2号", linkman: "赵海成", phone: "18075268688", curr_bad: "2", },
+        { id: "113", city: "苏州", area: "吴中区", company: "申通", pointName: "越溪镇区分部", address: "江苏省苏州市吴中区越城东路99号", linkman: "樊士虎", phone: "15150145059", curr_bad: "4", },
+        { id: "114", city: "苏州", area: "吴中区", company: "申通", pointName: "吴中南区", address: "江苏省苏州市吴中区吴中汽车站对面服装城1区4幢2号", linkman: "李正斌", phone: "13375183756", curr_bad: "7", },
+        { id: "115", city: "苏州", area: "吴中区", company: "申通", pointName: "吴中北区", address: "江苏省苏州市吴中区月苑街63号", linkman: "蒋大楚", phone: "15306201035", curr_bad: "19", },
+        { id: "116", city: "苏州", area: "工业园区", company: "申通", pointName: "湖东片区", address: "江苏省苏州市工业园区钟园路1号青年公社彩世界", linkman: "朱洲洋", phone: "15306201031", curr_bad: "3", },
+        { id: "117", city: "苏州", area: "吴中区", company: "申通", pointName: "东渚分部", address: "江苏省苏州市吴中区东渚镇龙景花园1区43幢102", linkman: "苏国洲", phone: "13073385924", curr_bad: "3", },
+        { id: "118", city: "苏州", area: "吴中区", company: "申通", pointName: "镇湖分部", address: "江苏省苏州市吴中区镇湖绣品街291-6", linkman: "冯晓阳", phone: "18118161559", curr_bad: "0", },
+        { id: "119", city: "苏州", area: "工业园区", company: "申通", pointName: "国发分部", address: "江苏省苏州市工业园区东环路209号", linkman: "刘亚然", phone: "13771949671", curr_bad: "4", },
+        { id: "120", city: "苏州", area: "相城区", company: "申通", pointName: "东桥分部", address: "江苏省苏州市相城区健民路58号（东桥幼儿园后面）", linkman: "汪克成", phone: "13584803035", curr_bad: "0", },
+        { id: "121", city: "苏州", area: "吴中区", company: "申通", pointName: "科技城片区", address: "江苏省苏州市吴中区昆仑山路与230省道交叉口", linkman: "朱晓刚", phone: "18913130068", curr_bad: "5", },
+        { id: "122", city: "苏州", area: "工业园区", company: "申通", pointName: "跨塘东分部", address: "江苏省苏州市园区创苑人才公寓", linkman: "李森斌", phone: "15050410220", curr_bad: "1", },
+        { id: "123", city: "苏州", area: "吴中区", company: "申通", pointName: "尹山湖片区", address: "江苏省苏州市吴中区郭巷金丝港路69号", linkman: "刘 玉", phone: "18051224389", curr_bad: "0", },
+        { id: "124", city: "苏州市", area: "工业园区", company: "天天快递", pointName: "金鸡湖路", address: "苏州市工业园区通园路385号", linkman: "陈燕", phone: "13812792631", curr_bad: "4", },
+        { id: "125", city: "苏州市", area: "姑苏区", company: "天天快递", pointName: "苏州十梓街", address: "苏州市姑苏区民治路42号", linkman: "秦金锋", phone: "18015574168", curr_bad: "3", },
+        { id: "126", city: "苏州市", area: "相城区", company: "天天快递", pointName: "苏州陆穆", address: "苏州市相城区御苑家园85幢", linkman: "徐天成", phone: "17751652444", curr_bad: "3", },
+        { id: "127", city: "苏州市", area: "姑苏区", company: "天天快递", pointName: "石路", address: "苏州市姑苏区胡家浜50幢101", linkman: "智清平", phone: "13771870435", curr_bad: "3", },
+        { id: "128", city: "苏州市", area: "相城区", company: "天天快递", pointName: "苏州东桥", address: "苏州市相城区东桥聚民路40号", linkman: "张浩", phone: "15190569035", curr_bad: "3", },
+        { id: "129", city: "苏州市", area: "吴中区", company: "天天快递", pointName: "苏州新区八", address: "苏州市吴中区木渎谢村小区189号", linkman: "杨龙兵", phone: "13914024924", curr_bad: "3", },
+        { id: "130", city: "苏州市", area: "高新区", company: "天天快递", pointName: "市场部二部", address: "苏州市高新区建林路185号", linkman: "刘云会", phone: "15850146491", curr_bad: "4", },
+        { id: "131", city: "苏州市", area: "吴中区", company: "天天快递", pointName: "苏州枫津", address: "苏州市高新区马涧一区", linkman: "游兵", phone: "13700886508", curr_bad: "2", },
+        { id: "132", city: "苏州市", area: "吴中区", company: "天天快递", pointName: "苏州胥口镇", address: "苏州市吴中区胥口镇文胥坊1幢102号", linkman: "候子魁", phone: "15555988556", curr_bad: "3", },
+        { id: "133", city: "苏州市", area: "高新区", company: "天天快递", pointName: "苏州东环二部", address: "苏州市高新区科惠路1号", linkman: "吉原庆", phone: "13390842771", curr_bad: "4", },
+        { id: "134", city: "苏州市", area: "姑苏区", company: "天天快递", pointName: "西园", address: "苏州市姑苏区枫桥路658号", linkman: "王海妮", phone: "15995439905", curr_bad: "4", },
+        { id: "135", city: "苏州市", area: "工业园区", company: "天天快递", pointName: "苏州二分部", address: "苏州市工业园区林泉街608号", linkman: "周子牛", phone: "13913195963", curr_bad: "4", },
+        { id: "136", city: "苏州市", area: "相城区", company: "天天快递", pointName: "苏州黄埭", address: "苏州市相城区黄埭裴育家园小区西门", linkman: "居伟", phone: "15862391810", curr_bad: "4", },
+        { id: "137", city: "苏州市", area: "姑苏区", company: "天天快递", pointName: "苏州景德路", address: "苏州市姑苏区宋先洲巷21号", linkman: "刘杰", phone: "15366211637", curr_bad: "3", },
+        { id: "138", city: "苏州市", area: "高新区", company: "天天快递", pointName: "苏州横塘", address: "苏州市高新区长江路98号", linkman: "汪亮", phone: "15962623141", curr_bad: "3", },
+        { id: "139", city: "苏州市", area: "工业园区", company: "天天快递", pointName: "甪直西分部", address: "苏州市吴中区甪直镇凌港菜场东侧", linkman: "姚外明", phone: "13915402559", curr_bad: "3", },
+        { id: "140", city: "苏州市", area: "相城区", company: "天天快递", pointName: "苏州新区七", address: "苏州市相城区望亭新华路2号", linkman: "徐炳成", phone: "13063702285", curr_bad: "4", },
+        { id: "141", city: "苏州市", area: "相城区", company: "天天快递", pointName: "渭塘", address: "苏州市相城区齐河路98号", linkman: "秦红伟", phone: "13405285593", curr_bad: "2", },
+        { id: "142", city: "苏州市", area: "姑苏区", company: "天天快递", pointName: "苏州五金城", address: "苏州市虎丘区虎殿路物流园1号", linkman: "戴查", phone: "15850248528", curr_bad: "5", },
+        { id: "143", city: "苏州市", area: "姑苏区", company: "天天快递", pointName: "苏州长青", address: "苏州市虎丘区虎丘路观景二村888号", linkman: "杨松", phone: "13812764209", curr_bad: "4", },
+        { id: "144", city: "苏州市", area: "相城区", company: "天天快递", pointName: "苏州望亭", address: "苏州市望亭镇新华村路2号对面", linkman: "冠洪新", phone: "13913523231", curr_bad: "2", },
+        { id: "145", city: "苏州市", area: "吴中区", company: "天天快递", pointName: "苏州吴东", address: "苏州市吴中区东湖新村", linkman: "张俊杰", phone: "15151457196", curr_bad: "3", },
+        { id: "146", city: "苏州市", area: "工业园区", company: "天天快递", pointName: "苏州胜浦", address: "苏州市胜浦镇新盛花园西区83幢", linkman: "徐小磊", phone: "13776101504", curr_bad: "3", },
+        { id: "147", city: "苏州市", area: "姑苏区", company: "天天快递", pointName: "西环", address: "苏州市姑苏区三香路彩香二村15幢", linkman: "阙煜添", phone: "13584418738", curr_bad: "5", },
+        { id: "148", city: "苏州市", area: "姑苏区", company: "天天快递", pointName: "阊胥", address: "苏州市姑苏区三香路8号", linkman: "王振舟", phone: "15051403601", curr_bad: "3", },
+        { id: "149", city: "苏州市", area: "姑苏区", company: "天天快递", pointName: "苏州竹辉路", address: "苏州市姑苏区桂花新村89幢", linkman: "王艳军", phone: "18963566116", curr_bad: "3", },
+        { id: "150", city: "苏州市", area: "姑苏区", company: "天天快递", pointName: "苏州东环北路", address: "苏州市干将东路相门新村19幢", linkman: "蒋文斌", phone: "18451018441", curr_bad: "3", },
+        { id: "151", city: "苏州市", area: "姑苏区", company: "天天快递", pointName: "苏州东中市路", address: "苏州市姑苏区韩雅庄60号", linkman: "秦金伟", phone: "13646203785", curr_bad: "1", },
+        { id: "152", city: "苏州市", area: "吴中区", company: "天天快递", pointName: "苏州郭巷", address: "苏州市吴中区郭巷镇西九盛街20号", linkman: "周驰", phone: "18013167110", curr_bad: "4", },
+        { id: "153", city: "苏州市", area: "工业园区", company: "天天快递", pointName: "甪直东分部", address: "苏州市工业园区甪直镇柯福路香槟1号-105", linkman: "关西亚", phone: "13771908978", curr_bad: "4", },
+        { id: "154", city: "苏州市", area: "姑苏区", company: "天天快递", pointName: "苏州南环东", address: "苏州市姑苏区南环新村121幢108", linkman: "高雪逸", phone: "15851477965", curr_bad: "4", },
+        { id: "155", city: "苏州市", area: "吴中区", company: "天天快递", pointName: "苏州浦庄", address: "苏州市吴中区浦庄湖桥湖中路南安花园对面", linkman: "陶磊", phone: "15050412735", curr_bad: "3", },
+        { id: "156", city: "苏州市", area: "吴中区", company: "天天快递", pointName: "苏州越溪", address: "苏州市吴中区越溪可可蜜园12-105", linkman: "王广伟/冯建勇", phone: "15150164445", curr_bad: "3", },
+        { id: "157", city: "苏州市", area: "高新区", company: "天天快递", pointName: "苏州电子市场", address: "苏州市高新区竹园路万枫家园40幢", linkman: "张永平", phone: "13401427190", curr_bad: "3", },
+        { id: "158", city: "苏州市", area: "高新区", company: "天天快递", pointName: "苏州通安", address: "苏州市高新区通安镇华通一区135幢", linkman: "张元成", phone: "15950078802", curr_bad: "3", },
+        { id: "159", city: "苏州", area: "吴江市", company: "圆通", pointName: "苏州市吴江正火速递有限公司", address: "江苏省苏州市吴江区松陵镇工业区", linkman: "薛旭柯", phone: "186 6266 4104‬", curr_bad: "20", },
+        { id: "160", city: "苏州", area: "相城区", company: "圆通", pointName: "相城", address: "苏州市相城区黄桥镇兴旺路3号", linkman: "李让先", phone: "13812658197", curr_bad: "36", },
+        { id: "161", city: "苏州", area: "吴中区", company: "圆通", pointName: "苏州万通速递有限公司", address: "苏州市吴中区宝丰路2号（圆通速递）", linkman: "童信海", phone: "18120057664", curr_bad: "24", },
+        { id: "162", city: "苏州", area: "姑苏区", company: "圆通", pointName: "苏州火隆货运有限公司", address: "苏州市姑苏区新塘工业区新星路77号圆通速递", linkman: "陈志强", phone: "18868037197", curr_bad: "16", },
+        { id: "163", city: "苏州", area: "吴中区", company: "韵达", pointName: "吴中区公司", address: "江苏省苏州市吴中区东吴南路1号韵达快递", linkman: "董渭", phone: "13588867877", curr_bad: "65", "备注": "2017年6月22日下发" },
+        { id: "164", city: "苏州", area: "姑苏区", company: "韵达", pointName: "江苏苏州姑苏区平江公司", address: "江苏省苏州市姑苏区观前街1号", linkman: "马云仙", phone: "18915513088", curr_bad: "60", "备注": "2017年6月22日下发" },
+        { id: "165", city: "苏州", area: "吴中区", company: "韵达", pointName: "锦亭公司", address: "江苏省苏州市吴中区木渎镇花苑东路5号", linkman: "毛守英", phone: "17715599992", curr_bad: "55", "备注": "2017年6月22日下发" },
+        { id: "166", city: "苏州", area: "吴中区", company: "韵达", pointName: "江苏主城区公司苏州吴中区胥口服务部", address: "江苏省苏州市吴中区胥口镇灵山路633-28号", linkman: "陈永祥", phone: "18118191898", curr_bad: "50", "备注": "2017年6月22日下发" },
+        { id: "167", city: "苏州", area: "高新区", company: "韵达", pointName: "苏州高新区公司", address: "江苏省苏州市虎丘区高新区湘江路金装街28-2号", linkman: "王文洲", phone: "18913172626", curr_bad: "56", "备注": "2017年6月22日下发" },
+        { id: "168", city: "苏州", area: "吴中区", company: "韵达", pointName: "苏州越溪镇公司", address: "江苏省苏州市吴中区横泾街道木东路7750号", linkman: "唐焕亮", phone: "13182670909", curr_bad: "25", "备注": "2017年6月22日下发" },
+        { id: "169", city: "苏州", area: "相城区", company: "韵达", pointName: "苏州新区北公司", address: "江苏省苏州市相城区望亭镇锦阳路508号荣大工业园2号厂房", linkman: "张传高", phone: "18762899822", curr_bad: "41", "备注": "2017年6月22日下发" },
+        { id: "170", city: "苏州", area: "吴中区", company: "中通", pointName: "苏州吴中三部", address: "苏州吴中区东吴北路龙港巷83号", linkman: "黄友发", phone: "15895501645", curr_bad: "4", },
+        { id: "171", city: "苏州", area: "园区", company: "中通", pointName: "苏州园区西部", address: "苏州园区扬绣路2号", linkman: "李富琴", phone: "18251126385", curr_bad: "11", },
+        { id: "172", city: "苏州", area: "姑苏区", company: "中通", pointName: "苏州东中市", address: "苏州姑苏区平四路惠济桥公交站边停车场内", linkman: "王  坤", phone: "18068032690", curr_bad: "9", },
+        { id: "173", city: "苏州", area: "园区", company: "中通", pointName: "苏州园区九部", address: "苏州园区星湖街与苏州大道东商旅大厦105室", linkman: "李大雨", phone: "17768012525", curr_bad: "9", },
+        { id: "174", city: "苏州", area: "虎丘区", company: "中通", pointName: "苏州横塘", address: "苏州虎丘区福运路188号德合农副产品批发市场", linkman: "赵红亮", phone: "18921446855", curr_bad: "10", },
+        { id: "175", city: "苏州", area: "姑苏区", company: "中通", pointName: "苏州四", address: "苏州金阊区阊胥路马路一区东18号洗车场内", linkman: "蒋开将", phone: "18262040893", curr_bad: "5", },
+        { id: "176", city: "苏州", area: "吴中区", company: "中通", pointName: "苏州吴中二部", address: "苏州吴中区月浜东公寓12-22号门口", linkman: "袁红祥", phone: "13812774550", curr_bad: "5", },
+        { id: "177", city: "苏州", area: "吴中区", company: "中通", pointName: "苏州越溪", address: "苏州吴中区越溪南官渡路6号", linkman: "魏家珠", phone: "18136449235", curr_bad: "12", },
+        { id: "178", city: "苏州", area: "相城区", company: "中通", pointName: "苏州太平", address: "苏州相城区金澄路110号", linkman: "张  杰", phone: "17714220888", curr_bad: "5", },
+        { id: "179", city: "苏州", area: "吴中区", company: "中通", pointName: "苏州木渎", address: "苏州木渎镇木渎商城23-8号/新华工业园", linkman: "朱海宏", phone: "18662942708", curr_bad: "8", },
+        { id: "180", city: "苏州", area: "园区", company: "中通", pointName: "苏州园区十一", address: "苏州园区钟南街669号湖畔天城3-102", linkman: "邓飞", phone: "13914092010", curr_bad: "7", },
+        { id: "181", city: "苏州", area: "姑苏区", company: "中通", pointName: "苏州南环", address: "苏州市姑苏区忆桥弄23号", linkman: "李社强", phone: "13862125880", curr_bad: "9", },
+        { id: "182", city: "苏州", area: "相城区", company: "中通", pointName: "苏州黄桥", address: "苏州黄桥镇农贸市场往北500米工业三区保安服务区", linkman: "尤志坚", phone: "15862428967", curr_bad: "4", },
+        { id: "183", city: "苏州", area: "姑苏区", company: "中通", pointName: "苏州金阊一部", address: "苏州市虎丘区金筑街380号 ", linkman: "范云飞", phone: "15150157676", curr_bad: "1", },
+        { id: "184", city: "苏州", area: "相城区", company: "中通", pointName: "苏州望亭", address: "苏州望亭镇迎湖村路2-8号", linkman: "李龙飞", phone: "17756909019", curr_bad: "0", },
+        { id: "185", city: "苏州", area: " 相城区", company: "中通", pointName: "苏州相城四部", address: "苏州相城区渭塘镇渭中路269号", linkman: "杨晨裕", phone: "18662170218", curr_bad: "2", },
+        { id: "186", city: "苏州", area: "虎丘区", company: "中通", pointName: "苏州新区中部", address: "苏州高新区康佳花园77幢", linkman: "徐传州", phone: "13511603164", curr_bad: "30", },
+        { id: "187", city: "苏州", area: "吴中区", company: "中通", pointName: "苏州胥口", address: "苏州胥口镇许家桥农贸市场54号", linkman: "唐守峰", phone: "13052810986", curr_bad: "2", },
+        { id: "188", city: "苏州", area: "虎丘区", company: "中通", pointName: "苏州新区七部", address: "苏州高新区长江花园3区13幢", linkman: "龚  伟", phone: "13291190198", curr_bad: "10", },
+        { id: "189", city: "苏州", area: "吴中区", company: "中通", pointName: "苏州跨堂", address: "苏州工业园区跨塘镇春晖路5号跨春工业坊1A厂房", linkman: "杜有庆", phone: "13812660405", curr_bad: "4", },
+        { id: "190", city: "苏州", area: "相城区", company: "中通", pointName: "苏州相城一部", address: "苏州相城区康元路98号", linkman: "王永", phone: "18662247007", curr_bad: "7", },
+        { id: "191", city: "苏州", area: "吴中区", company: "中通", pointName: "苏州新区十一", address: "苏州新区滨河路588号3-109", linkman: "郑爱玲", phone: "18994305686", curr_bad: "0", },
+        { id: "192", city: "苏州", area: "相城区", company: "中通", pointName: "苏州斜塘", address: "苏州园区车坊镇金谷路8号", linkman: "吴健", phone: "13372173499", curr_bad: "0", },
+        { id: "193", city: "苏州", area: "吴中区", company: "中通", pointName: "苏州横泾", address: "苏州市吴中区横泾镇吴家弄18号", linkman: "陈松", phone: "13295117172", curr_bad: "0", },
+        { id: "194", city: "苏州", area: "相城区", company: "中通", pointName: "苏州园区", address: "苏州市园区港田路99号5号厂房", linkman: "徐海民", phone: "13912777627", curr_bad: "0", },
+        { id: "195", city: "苏州", area: "吴中区", company: "中通", pointName: "苏州杨板泾", address: "苏州市沙苑路15号", linkman: "孙伟", phone: "15195654018", curr_bad: "0", },
+        { id: "196", city: "苏州", area: "相城区", company: "中通", pointName: "苏州范兆安", address: "苏州市园区通园路35号", linkman: "范兆安", phone: "15370334273", curr_bad: "0", },
+        { id: "197", city: "苏州", area: "吴中区", company: "中通", pointName: "苏州平江一部", address: "苏州市平江区桃花坞大街保健路12号", linkman: "孙兴忠", phone: "18013143398", curr_bad: "0", },
+        { id: "198", city: "苏州", area: "相城区", company: "中通", pointName: "苏州新区八部", address: "苏州新区华山路佳林花苑55栋中通快递门面房", linkman: "叶青", phone: "18915520477", curr_bad: "0", },
+        { id: "199", city: "苏州", area: "吴中区", company: "中通", pointName: "苏州东环", address: "苏州平江区永林二区47幢车库中通", linkman: "袁锋", phone: "15151570795", curr_bad: "0", },
+        { id: "200", city: "苏州", area: "相城区", company: "中通", pointName: "苏州相城五部", address: "苏州市相城区黄埭镇太东路2555号", linkman: "王道昌", phone: "18013598812", curr_bad: "0", },
+        { id: "201", city: "苏州", area: "吴中区", company: "中通", pointName: "苏州七", address: "苏州市沧浪区干将东路621号中通快递", linkman: "简伟伟", phone: "15150157998", curr_bad: "0", },
+        { id: "202", city: "苏州", area: "相城区", company: "中通", pointName: "苏州新区东部", address: "苏州新区滨河花苑二期6-103门面中通", linkman: "庄伟龙", phone: "13306207719", curr_bad: "0", },
+        { id: "203", city: "苏州", area: "吴中区", company: "中通", pointName: "苏州明基", address: "苏州市高新区珠江路169号", linkman: "刘德胜", phone: "17714074393", curr_bad: "0", },
+        { id: "204", city: "苏州", area: "相城区", company: "中通", pointName: "苏州吴中南", address: "江苏省苏州市吴中区城南街道东吴南路69号", linkman: "时华利", phone: "18913170091", curr_bad: "0", },
+
+    ]
+    var map = new BMap.Map("allmap");
+
+    map.enableScrollWheelZoom(true);
+    map.addControl(new BMap.NavigationControl());  //添加默认缩放平移控件
+    map.addControl(new BMap.OverviewMapControl()); //添加默认缩略地图控件
+
+    var point = new BMap.Point(120.597703, 31.315806);
+    map.centerAndZoom(point, 15);
+
+
+    // 编写自定义函数,创建标注
+    function addMarker(point) {
+        var marker = new BMap.Marker(point);
+        map.addOverlay(marker);
+    }
+
+    var localSearch = new BMap.LocalSearch(map);
+    localSearch.enableAutoViewport();
+
+    //保存地址数据
+    function saveAddress(data) {
+        clearAddress();
+        localStorage.setItem('ADDRESS', JSON.stringify(data));
+    }
+    //清除地址数据
+    function clearAddress() {
+        localStorage.removeItem('ADDRESS');
+    }
+    getAllPoint();
+    function getAllPoint() {
+        var data = localStorage.getItem('ADDRESS');
+        if (data) {
+            showPoint(JSON.parse(data));
+        } else {
+            var i = 0;
+            var timer = setInterval(function () {
+                i++
+                if (i < addressData.length) {
+                    if (i == addressData.length - 1) {
+                        searchByStationName(addressData[i].address, 'last', function () {
+                            showPoint(markers);
+                        });
+                    } else {
+                        searchByStationName(addressData[i].address);
+                    }
+                } else {
+                    clearInterval(timer);
+                }
+            }, 50);
+        }
+
+    }
+    function showPoint(data) {
+        if (data) {
+            for (var i = 0; i < data.length; i++) {
+                var point = data[i];
+                map.addOverlay(point);
+            }
+        }
+    }
+
+    // searchByStationName('苏州新区滨河花苑二期6-103门面中通');
+    // searchByStationName('苏州市姑苏区韩雅庄60号');
+    // searchByStationName('苏州市平江区桃花坞大街保健路12号');
+
+    var markers = [];
+
+    function searchByStationName(keyword, type, callback) {
+        localSearch.setSearchCompleteCallback(function (searchResult) {
+            var poi = searchResult.getPoi(0);
+            var marker = new BMap.Marker(new BMap.Point(poi.point.lng, poi.point.lat));  // 创建标注，为要查询的地方对应的经纬度
+            markers.push(marker);
+            if (type == 'last') {
+                saveAddress(markers);
+                callback();
+            }
+        });
+        localSearch.search(keyword);
+    }
+</script>
