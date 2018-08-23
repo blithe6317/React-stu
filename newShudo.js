@@ -257,7 +257,10 @@ function setFirstEmptyValue(array, id, index) {
         }
     }
 }
-
+function levelChange(e) {
+    LEVEL = parseInt($(e).val());
+    begin();
+}
 /**
  * 生成数独完毕，开始展示可以玩的数独
  */
