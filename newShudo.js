@@ -261,6 +261,7 @@ function levelChange(e) {
     LEVEL = parseInt($(e).val());
     begin();
 }
+
 /**
  * 生成数独完毕，开始展示可以玩的数独
  */
@@ -553,4 +554,68 @@ function goNext() {
             }
         });
     });
+}
+
+
+/**
+ * 检查数独
+ */
+function checkSudu() {
+    var list = $('#sudo').find('td.item');
+    for (var i = 0; i < list.length; i++) {
+        var id = $(list[i]).attr('id');
+        var xA = id.split('')[0],
+            yA = id.split('')[1];
+        var val = $(list[i]).find('span').text();
+        if ($(list[i]).attr('has')) {
+            if (val) {
+                var reg = /^[1-9]{1}$/;
+                if (!reg.test(val)) {
+                    return alert('请按规则填写@.@')
+                }
+            } else {
+                return alert('还没填完空格呢！。！');
+            }
+        }
+    }
+    var sudo = getCurSudo();
+    for (var i = 0; i < sudo.length; i++) {
+        for (var j = 0; j < sudo[i].length; j++) {
+            var id = i + '' + j;
+            var pArr = getPTWOArr(id, sudo);
+            if (pArr.length > 0) {
+                return alert('哟哟哟！错了吧');
+            }
+        }
+    }
+    return alert('nice!你作对了！%%')
+}
+
+function getPTWOArr(xy, sudo) {
+    xy = xy + '';
+    var xA = parseInt(xy.split('')[0]),
+        yA = parseInt(xy.split('')[1]);
+    let farr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+    var x = Math.floor(xA / 3) * 3 + Math.floor(yA / 3),
+        y = xA % 3 * 3 + yA % 3,
+        xArr = getXArr(sudo, x),
+        yArr = getYArr(sudo, y),
+        boxArr = getBoxArr(sudo, xA),
+        oldArr = xArr.concat(yArr).concat(boxArr),
+        newArr = [];
+    for (let i = 0; i < oldArr.length; i++) {
+        if (newArr.length <= 0 && oldArr[i]) {
+            newArr.push(parseInt(oldArr[i]));
+        } else {
+            if (newArr.indexOf(parseInt(oldArr[i])) < 0 && oldArr[i]) {
+                newArr.push(parseInt(oldArr[i]));
+            }
+        }
+    }
+    var pArr = farr.filter(i => {
+        return newArr.indexOf(i) < 0;
+    });
+    return pArr;
+
 }
