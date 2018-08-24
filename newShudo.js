@@ -415,7 +415,7 @@ function findSame(itemId) {
 }
 
 function addNum(num) {
-    var $item = $('#sudo td.number-box.click');
+    var $item = $('#sudo td.item.click');
     var itemId = $item.attr('id');
     $('#sudo td.item').removeClass('click');
     var curSudo = getCurSudo();
@@ -437,7 +437,7 @@ function addNum(num) {
 }
 
 function deleteNum() {
-    var $item = $('#sudo td.number-box.click');
+    var $item = $('#sudo td.item.click');
     $item.text('');
     addDBnum();
 }
@@ -456,7 +456,7 @@ function getCurSudo() {
 }
 
 function addFlag() {
-    var $item = $('#sudo td.click');
+    var $item = $('#sudo td.item.click');
     var html = '<div class="btn-flag"></div>',
         flag = $item.find('.btn-flag');
     if (flag && flag.length > 0) {
@@ -493,7 +493,6 @@ function addDBnum() {
 }
 function createDBTable() {
     var creatTableSQL = 'CREATE TABLE IF  NOT EXISTS ADDLOGS (rowid INTEGER PRIMARY KEY AUTOINCREMENT, sudo text,action text,count text)';
-
     if (webDB) {
         webDB.transaction(function (tx) {
             tx.executeSql(creatTableSQL, []);
