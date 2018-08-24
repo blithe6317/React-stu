@@ -270,6 +270,7 @@ function beginPlayBlock(array) {
     HIDESUDO = randomHideSudo(newArr);
     creatDataBase(HIDESUDO);
     showShuDo(HIDESUDO);
+    beginTime();
 }
 
 function randomHideSudo(array) {
@@ -296,9 +297,11 @@ function randomHideSudo(array) {
 function again() {
     showShuDo(HIDESUDO);
     creatDataBase(HIDESUDO);
+    playCount = 0;
 }
 function begin() {
     isOver = false;
+    playCount = 0;
     getShudo();
     creatDataBase(HIDESUDO);
     $('#sudo td.item').removeAttr('has');
@@ -597,6 +600,7 @@ function checkSudu() {
             }
         }
     }
+    stopTime();
     return alert('nice!你作对了！%%')
 }
 
@@ -627,4 +631,22 @@ function getPTWOArr(xy, sudo) {
     });
     return pArr;
 
+}
+var playTimer;
+var playCount = 0;
+function beginTime() {
+    playTimer = setInterval(() => {
+        playCount++;
+        showTime(playCount);
+    }, 1000);
+}
+function stopTime() {
+    clearInterval(playTimer);
+}
+
+function showTime(count) {
+    var m = Math.floor(count / 60);
+    var s = count % 60;
+    var timeStr = (m < 10 ? ('0' + m) : m) + ':' + (s < 10 ? ('0' + s) : s);
+    $('#playTime').text(timeStr);
 }
