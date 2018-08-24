@@ -470,6 +470,7 @@ var webDB = openDatabase('mydb', '1.0', 'Test DB', 2 * 1024 * 1024);
 function creatDataBase(arrayStr) {
     arrayStr = JSON.stringify(arrayStr);
     if (webDB) {
+        createDBTable();
         deleteDBTable();
         webDB.transaction(function (tx) {
             tx.executeSql('insert into ADDLOGS (sudo,action,count) values (?,1,0)', [arrayStr]);
@@ -487,6 +488,15 @@ function addDBnum() {
             tx.executeSql(findAction, [], function (tx, result) {
                 tx.executeSql('insert into ADDLOGS (sudo,action,count) values (?,1,?)', [arrayStr, count]);
             });
+        });
+    }
+}
+function createDBTable() {
+    var creatTableSQL = 'CREATE TABLE IF  NOT EXISTS ADDLOGS (rowid INTEGER PRIMARY KEY AUTOINCREMENT, sudo text,action text,count text)';
+    debugger
+    if (webDB) {
+        webDB.transaction(function (tx) {
+            tx.executeSql(creatTableSQL, []);
         });
     }
 }
