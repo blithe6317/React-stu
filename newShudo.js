@@ -493,7 +493,7 @@ function addDBnum() {
 }
 function createDBTable() {
     var creatTableSQL = 'CREATE TABLE IF  NOT EXISTS ADDLOGS (rowid INTEGER PRIMARY KEY AUTOINCREMENT, sudo text,action text,count text)';
-    debugger
+
     if (webDB) {
         webDB.transaction(function (tx) {
             tx.executeSql(creatTableSQL, []);
