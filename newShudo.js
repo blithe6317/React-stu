@@ -438,7 +438,7 @@ function addNum(num) {
 
 function deleteNum() {
     var $item = $('#sudo td.item.click');
-    $item.text('');
+    $item.find('span').text('');
     addDBnum();
 }
 
