@@ -270,6 +270,7 @@ function beginPlayBlock(array) {
     HIDESUDO = randomHideSudo(newArr);
     creatDataBase(HIDESUDO);
     showShuDo(HIDESUDO);
+    stopTime();
     beginTime();
 }
 
