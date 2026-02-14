@@ -2,7 +2,7 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <title>专业颜色混合实验室</title>
+    <title>颜料混合实验室</title>
     <style>
       body {
         margin: 0;
@@ -97,13 +97,14 @@
       .small-circles-container {
         display: flex;
         justify-content: center;
-        gap: 25px;
+        flex-wrap: wrap;
+        gap: 15px;
         margin-bottom: 10px;
       }
 
       .small-circle {
-        width: 70px;
-        height: 70px;
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
         cursor: grab;
         transition: all 0.3s ease;
@@ -124,12 +125,28 @@
         background: linear-gradient(145deg, #ff5252, #b33939);
       }
 
+      .small-circle.orange {
+        background: linear-gradient(145deg, #ff9800, #e65100);
+      }
+
+      .small-circle.yellow {
+        background: linear-gradient(145deg, #ffeb3b, #f9a825);
+      }
+
       .small-circle.green {
         background: linear-gradient(145deg, #4caf50, #388e3c);
       }
 
+      .small-circle.cyan {
+        background: linear-gradient(145deg, #00e5ff, #00838f);
+      }
+
       .small-circle.blue {
         background: linear-gradient(145deg, #42a5f5, #2c81ba);
+      }
+
+      .small-circle.violet {
+        background: linear-gradient(145deg, #ab47bc, #6a1b9a);
       }
 
       .color-selectors {
@@ -261,9 +278,9 @@
   </head>
   <body>
     <div class="header">
-      <h1>专业颜色混合实验室</h1>
+      <h1>颜料混合实验室</h1>
       <p>
-        基于标准RGB加色混合原理构建，支持精确的三原色混合计算。拖拽颜色球或自定义颜色到中央区域，观察实时混合效果。
+        基于 HSL 色相环混合原理构建，模拟真实颜料调色效果。拖拽颜色球或自定义颜色到中央区域，观察实时混合效果。
       </p>
     </div>
 
@@ -290,6 +307,26 @@
             <span>红</span>
           </div>
           <div
+            class="small-circle orange"
+            draggable="true"
+            data-color="orange"
+            data-r="255"
+            data-g="127"
+            data-b="0"
+          >
+            <span>橙</span>
+          </div>
+          <div
+            class="small-circle yellow"
+            draggable="true"
+            data-color="yellow"
+            data-r="255"
+            data-g="255"
+            data-b="0"
+          >
+            <span>黄</span>
+          </div>
+          <div
             class="small-circle green"
             draggable="true"
             data-color="green"
@@ -300,6 +337,16 @@
             <span>绿</span>
           </div>
           <div
+            class="small-circle cyan"
+            draggable="true"
+            data-color="cyan"
+            data-r="0"
+            data-g="255"
+            data-b="255"
+          >
+            <span>青</span>
+          </div>
+          <div
             class="small-circle blue"
             draggable="true"
             data-color="blue"
@@ -308,6 +355,16 @@
             data-b="255"
           >
             <span>蓝</span>
+          </div>
+          <div
+            class="small-circle violet"
+            draggable="true"
+            data-color="violet"
+            data-r="139"
+            data-g="0"
+            data-b="255"
+          >
+            <span>紫</span>
           </div>
         </div>
 
@@ -378,31 +435,32 @@
       </div>
 
       <div class="instructions">
-        <h3>混合原理说明</h3>
+        <h3>混合原理说明（HSL 色相环颜料混合）</h3>
         <div class="formula-row">
-          <span>🔴 红 + 🟢 绿</span>
-          <span>→ 🟡 黄 (RGB(255,255,0))</span>
+          <span>🔴 红 + 🟡 黄</span>
+          <span>→ 🟠 橙色</span>
+        </div>
+        <div class="formula-row">
+          <span>🟡 黄 + 🔵 蓝</span>
+          <span>→ 🟢 绿色</span>
         </div>
         <div class="formula-row">
           <span>🔴 红 + 🔵 蓝</span>
-          <span>→ 🟣 品红 (RGB(255,0,255))</span>
+          <span>→ 🟣 紫色</span>
         </div>
         <div class="formula-row">
-          <span>🟢 绿 + 🔵 蓝</span>
-          <span>→ 🟢 青 (RGB(0,255,255))</span>
-        </div>
-        <div class="formula-row">
-          <span>🔴 红 + 🟢 绿 + 🔵 蓝</span>
-          <span>→ ⚪ 白 (RGB(255,255,255))</span>
+          <span>🟠 橙 + 🟢 绿</span>
+          <span>→ 🟡 黄色</span>
         </div>
         <div class="formula-row">
           <span>⚪ 白 + 任何颜色</span>
-          <span>→ 新颜色 (直接显示)</span>
+          <span>→ 该颜色本身</span>
         </div>
 
         <div class="color-info">
-          <p>💡 提示：拖拽下方颜色球或自定义颜色到中央区域</p>
-          <p>💡 提示：当混合结果为白色时，再添加任何颜色都会直接显示新颜色</p>
+          <p>💡 原理：在色相环上取两色中间色相，色相距离越远混合结果越浑浊</p>
+          <p>💡 提示：拖拽颜色球或自定义颜色到中央区域进行混合</p>
+          <p>💡 效果：模拟真实颜料调色，红+黄=橙、黄+蓝=绿、红+蓝=紫</p>
         </div>
       </div>
     </div>
@@ -561,26 +619,73 @@
         switch (colorType) {
           case "red":
             return { r: 255, g: 0, b: 0 };
+          case "orange":
+            return { r: 255, g: 127, b: 0 };
+          case "yellow":
+            return { r: 255, g: 255, b: 0 };
           case "green":
             return { r: 0, g: 255, b: 0 };
+          case "cyan":
+            return { r: 0, g: 255, b: 255 };
           case "blue":
             return { r: 0, g: 0, b: 255 };
+          case "violet":
+            return { r: 139, g: 0, b: 255 };
           default:
             return { r: 0, g: 0, b: 0 };
         }
       }
 
-      // 核心颜色混合算法
+      // 核心颜色混合算法 — HSL 色相环颜料混合
       function mixColors(newColor) {
-        // 特殊处理：如果当前是白色，直接替换为新颜色
+        // 特殊处理：白色不参与混合
+        if (isWhite(newColor)) {
+          updateColorDisplay();
+          return;
+        }
         if (isWhite(currentColor)) {
           currentColor = { ...newColor };
-        } else {
-          // 标准RGB相加
-          currentColor.r = Math.min(currentColor.r + newColor.r, 255);
-          currentColor.g = Math.min(currentColor.g + newColor.g, 255);
-          currentColor.b = Math.min(currentColor.b + newColor.b, 255);
+          updateColorDisplay();
+          return;
         }
+
+        const hsl1 = rgbToHsl(currentColor.r, currentColor.g, currentColor.b);
+        const hsl2 = rgbToHsl(newColor.r, newColor.g, newColor.b);
+
+        let h, s, l;
+
+        if (hsl1.s < 0.01 && hsl2.s < 0.01) {
+          // 两色都是无彩色（黑/灰），直接平均亮度
+          h = 0;
+          s = 0;
+          l = (hsl1.l + hsl2.l) / 2;
+        } else if (hsl1.s < 0.01) {
+          // 当前无彩色，采用新颜色色相
+          h = hsl2.h;
+          s = hsl2.s / 2;
+          l = (hsl1.l + hsl2.l) / 2;
+        } else if (hsl2.s < 0.01) {
+          // 新颜色无彩色，保持当前色相
+          h = hsl1.h;
+          s = hsl1.s / 2;
+          l = (hsl1.l + hsl2.l) / 2;
+        } else {
+          // 两色都有彩色 — 色相环上取中间值
+          h = circularHueMean(hsl1.h, hsl2.h);
+
+          // 色相距离越远，混合结果越浑浊（饱和度降低、亮度降低）
+          let hueDiff = Math.abs(hsl2.h - hsl1.h);
+          if (hueDiff > 180) hueDiff = 360 - hueDiff;
+
+          const satFactor = 1 - (hueDiff / 180) * 0.4;
+          const lightFactor = 1 - (hueDiff / 180) * 0.15;
+
+          s = ((hsl1.s + hsl2.s) / 2) * satFactor;
+          l = ((hsl1.l + hsl2.l) / 2) * lightFactor;
+        }
+
+        const rgb = hslToRgb(h, s, l);
+        currentColor = { r: rgb.r, g: rgb.g, b: rgb.b };
 
         updateColorDisplay();
       }
@@ -588,6 +693,78 @@
       // 判断是否为白色
       function isWhite(color) {
         return color.r === 255 && color.g === 255 && color.b === 255;
+      }
+
+      // ---- HSL 辅助函数 ----
+
+      // RGB 转 HSL
+      function rgbToHsl(r, g, b) {
+        r /= 255;
+        g /= 255;
+        b /= 255;
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        let h,
+          s,
+          l = (max + min) / 2;
+
+        if (max === min) {
+          h = s = 0;
+        } else {
+          const d = max - min;
+          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+          switch (max) {
+            case r:
+              h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+              break;
+            case g:
+              h = ((b - r) / d + 2) / 6;
+              break;
+            case b:
+              h = ((r - g) / d + 4) / 6;
+              break;
+          }
+        }
+        return { h: h * 360, s, l };
+      }
+
+      // HSL 转 RGB
+      function hslToRgb(h, s, l) {
+        h /= 360;
+        let r, g, b;
+        if (s === 0) {
+          r = g = b = l;
+        } else {
+          const hue2rgb = (p, q, t) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
+          };
+          const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+          const p = 2 * l - q;
+          r = hue2rgb(p, q, h + 1 / 3);
+          g = hue2rgb(p, q, h);
+          b = hue2rgb(p, q, h - 1 / 3);
+        }
+        return {
+          r: Math.round(r * 255),
+          g: Math.round(g * 255),
+          b: Math.round(b * 255),
+        };
+      }
+
+      // 色相环上取两个色相的中间值（沿较短弧）
+      function circularHueMean(h1, h2) {
+        let diff = h2 - h1;
+        if (diff > 180) diff -= 360;
+        if (diff < -180) diff += 360;
+        let mean = h1 + diff / 2;
+        if (mean < 0) mean += 360;
+        if (mean >= 360) mean -= 360;
+        return mean;
       }
 
       // 更新颜色显示
@@ -665,17 +842,8 @@
 
         if (!rgbColor) return;
 
-        // 特殊处理：如果当前是白色，直接替换为新颜色
-        if (isWhite(currentColor)) {
-          currentColor = { ...rgbColor };
-        } else {
-          // 标准RGB相加
-          currentColor.r = Math.min(currentColor.r + rgbColor.r, 255);
-          currentColor.g = Math.min(currentColor.g + rgbColor.g, 255);
-          currentColor.b = Math.min(currentColor.b + rgbColor.b, 255);
-        }
-
-        updateColorDisplay();
+        // 复用核心混合算法
+        mixColors(rgbColor);
 
         // 添加混合动画
         createMixingEffect(`custom${index}`);
