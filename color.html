@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>专业颜色混合实验室</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        background: linear-gradient(145deg, #1e3c72, #2a5298);
+        font-family: "Segoe UI", Arial, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #fff;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        max-width: 800px;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .header p {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: #e0e0e0;
+      }
+
+      .main-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 40px;
+        max-width: 900px;
+      }
+
+      .mixing-area {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 25px;
+        background: rgba(0, 0, 0, 0.25);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        width: 100%;
+        max-width: 600px;
+      }
+
+      .big-circle-container {
+        position: relative;
+        width: 280px;
+        height: 280px;
+      }
+
+      .big-circle {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background-color: #ffffff;
+        border: 4px solid #4a4a4a;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: visible;
+      }
+
+      .result-display {
+        position: absolute;
+        top: -50px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-100%);
+        background: rgba(0, 0, 0, 0.85);
+        color: white;
+        padding: 12px 25px;
+        border-radius: 50px;
+        font-weight: bold;
+        font-size: 18px;
+        min-width: 220px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        z-index: 20;
+        transition: all 0.3s ease;
+      }
+
+      .small-circles-container {
+        display: flex;
+        justify-content: center;
+        gap: 25px;
+        margin-bottom: 10px;
+      }
+
+      .small-circle {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        cursor: grab;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5),
+          inset 0 0 12px rgba(255, 255, 255, 0.2);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+        border: 3px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .small-circle.red {
+        background: linear-gradient(145deg, #ff5252, #b33939);
+      }
+
+      .small-circle.green {
+        background: linear-gradient(145deg, #4caf50, #388e3c);
+      }
+
+      .small-circle.blue {
+        background: linear-gradient(145deg, #42a5f5, #2c81ba);
+      }
+
+      .color-selectors {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+        width: 100%;
+        margin-top: 20px;
+      }
+
+      .color-selector {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .color-selector label {
+        font-weight: bold;
+        font-size: 16px;
+        color: #e0e0e0;
+      }
+
+      .color-picker-area {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .color-preview {
+        width: 45px;
+        height: 45px;
+        border-radius: 10px;
+        border: 3px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+        cursor: grab;
+        transition: all 0.3s ease;
+      }
+
+      .color-input {
+        width: 55px;
+        height: 40px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      .actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 15px;
+      }
+
+      .action-btn {
+        padding: 10px 20px;
+        background: linear-gradient(145deg, #4a00e0, #6a11cb);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      }
+
+      .action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 7px 15px rgba(0, 0, 0, 0.4);
+      }
+
+      .reset-btn {
+        background: linear-gradient(145deg, #ff416c, #ff4b2b);
+        margin-top: 15px;
+        padding: 12px 30px;
+        font-size: 16px;
+      }
+
+      .instructions {
+        background: rgba(0, 0, 0, 0.35);
+        border-radius: 15px;
+        padding: 25px;
+        margin-top: 20px;
+        max-width: 600px;
+        line-height: 1.7;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .instructions h3 {
+        color: #ffffff;
+        margin-top: 0;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #4a4a4a;
+        padding-bottom: 10px;
+      }
+
+      .formula-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        padding-bottom: 8px;
+        border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+      }
+
+      .formula-row:last-child {
+        border-bottom: none;
+      }
+
+      .color-info {
+        margin-top: 15px;
+        text-align: center;
+        font-size: 14px;
+        color: #cccccc;
+      }
+
+      .drag-indicator {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.7);
+        background: rgba(0, 0, 0, 0.5);
+        padding: 2px 10px;
+        border-radius: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>专业颜色混合实验室</h1>
+      <p>
+        基于标准RGB加色混合原理构建，支持精确的三原色混合计算。拖拽颜色球或自定义颜色到中央区域，观察实时混合效果。
+      </p>
+    </div>
+
+    <div class="main-container">
+      <div class="mixing-area">
+        <div class="big-circle-container">
+          <div class="big-circle" id="bigCircle">
+            <div class="result-display" id="resultDisplay">
+              RGB(255,255,255) #FFFFFF
+            </div>
+            <div class="drag-indicator">拖拽颜色到此处</div>
+          </div>
+        </div>
+
+        <div class="small-circles-container">
+          <div
+            class="small-circle red"
+            draggable="true"
+            data-color="red"
+            data-r="255"
+            data-g="0"
+            data-b="0"
+          >
+            <span>红</span>
+          </div>
+          <div
+            class="small-circle green"
+            draggable="true"
+            data-color="green"
+            data-r="0"
+            data-g="255"
+            data-b="0"
+          >
+            <span>绿</span>
+          </div>
+          <div
+            class="small-circle blue"
+            draggable="true"
+            data-color="blue"
+            data-r="0"
+            data-g="0"
+            data-b="255"
+          >
+            <span>蓝</span>
+          </div>
+        </div>
+
+        <div class="color-selectors">
+          <div class="color-selector">
+            <label>自定义颜色1</label>
+            <div class="color-picker-area">
+              <input
+                type="color"
+                class="color-input"
+                id="color1"
+                value="#ff0000"
+              />
+              <div
+                class="color-preview"
+                id="colorPreview1"
+                draggable="true"
+                data-type="custom"
+              ></div>
+            </div>
+          </div>
+
+          <div class="color-selector">
+            <label>自定义颜色2</label>
+            <div class="color-picker-area">
+              <input
+                type="color"
+                class="color-input"
+                id="color2"
+                value="#00ff00"
+              />
+              <div
+                class="color-preview"
+                id="colorPreview2"
+                draggable="true"
+                data-type="custom"
+              ></div>
+            </div>
+          </div>
+
+          <div class="color-selector">
+            <label>自定义颜色3</label>
+            <div class="color-picker-area">
+              <input
+                type="color"
+                class="color-input"
+                id="color3"
+                value="#0000ff"
+              />
+              <div
+                class="color-preview"
+                id="colorPreview3"
+                draggable="true"
+                data-type="custom"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="action-btn" onclick="addColor(1)">添加颜色1</button>
+          <button class="action-btn" onclick="addColor(2)">添加颜色2</button>
+          <button class="action-btn" onclick="addColor(3)">添加颜色3</button>
+          <button class="action-btn reset-btn" onclick="resetColors()">
+            重置所有
+          </button>
+        </div>
+      </div>
+
+      <div class="instructions">
+        <h3>混合原理说明</h3>
+        <div class="formula-row">
+          <span>🔴 红 + 🟢 绿</span>
+          <span>→ 🟡 黄 (RGB(255,255,0))</span>
+        </div>
+        <div class="formula-row">
+          <span>🔴 红 + 🔵 蓝</span>
+          <span>→ 🟣 品红 (RGB(255,0,255))</span>
+        </div>
+        <div class="formula-row">
+          <span>🟢 绿 + 🔵 蓝</span>
+          <span>→ 🟢 青 (RGB(0,255,255))</span>
+        </div>
+        <div class="formula-row">
+          <span>🔴 红 + 🟢 绿 + 🔵 蓝</span>
+          <span>→ ⚪ 白 (RGB(255,255,255))</span>
+        </div>
+        <div class="formula-row">
+          <span>⚪ 白 + 任何颜色</span>
+          <span>→ 新颜色 (直接显示)</span>
+        </div>
+
+        <div class="color-info">
+          <p>💡 提示：拖拽下方颜色球或自定义颜色到中央区域</p>
+          <p>💡 提示：当混合结果为白色时，再添加任何颜色都会直接显示新颜色</p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 颜色混合状态
+      let currentColor = { r: 255, g: 255, b: 255 }; // 默认白色
+      const bigCircle = document.getElementById("bigCircle");
+      const resultDisplay = document.getElementById("resultDisplay");
+      const colorPreviews = [
+        document.getElementById("colorPreview1"),
+        document.getElementById("colorPreview2"),
+        document.getElementById("colorPreview3"),
+      ];
+
+      // 初始化
+      init();
+
+      function init() {
+        // 初始化颜色选择器预览
+        initColorPreviews();
+
+        // 初始化拖拽事件
+        initDragEvents();
+
+        // 更新颜色显示
+        updateColorDisplay();
+      }
+
+      // 初始化颜色选择器预览
+      function initColorPreviews() {
+        colorPreviews.forEach((preview, index) => {
+          const colorInput = document.getElementById(`color${index + 1}`);
+          updatePreview(index);
+
+          colorInput.addEventListener("input", () => {
+            updatePreview(index);
+          });
+        });
+      }
+
+      // 更新颜色预览
+      function updatePreview(index) {
+        const colorInput = document.getElementById(`color${index + 1}`);
+        const preview = colorPreviews[index];
+
+        const color = hexToRgb(colorInput.value);
+        preview.style.backgroundColor = colorInput.value;
+
+        const rgb = color
+          ? `rgb(${color.r}, ${color.g}, ${color.b})`
+          : colorInput.value;
+
+        preview.style.border = `3px solid ${rgb}`;
+      }
+
+      // 初始化拖拽事件
+      function initDragEvents() {
+        // 小圆拖拽事件
+        const smallCircles = document.querySelectorAll(".small-circle");
+        smallCircles.forEach((circle) => {
+          circle.addEventListener("dragstart", (e) => {
+            const colorType = e.target.dataset.color;
+            const colorData = getColorValues(colorType);
+
+            e.dataTransfer.setData("color", JSON.stringify(colorData));
+            e.dataTransfer.setData("source", "preset");
+            e.dataTransfer.setData("colorType", colorType);
+
+            // 拖拽视觉反馈
+            e.target.style.opacity = "0.7";
+            e.target.style.transform = "scale(0.95)";
+          });
+
+          circle.addEventListener("dragend", (e) => {
+            e.target.style.opacity = "1";
+            e.target.style.transform = "scale(1)";
+          });
+        });
+
+        // 自定义颜色预览拖拽事件
+        colorPreviews.forEach((preview, index) => {
+          preview.addEventListener("dragstart", (e) => {
+            const colorInput = document.getElementById(`color${index + 1}`);
+            const color = hexToRgb(colorInput.value);
+
+            e.dataTransfer.setData("color", JSON.stringify(color));
+            e.dataTransfer.setData("source", "custom");
+            e.dataTransfer.setData("colorType", `custom${index}`);
+
+            // 拖拽视觉反馈
+            e.target.style.opacity = "0.7";
+            e.target.style.transform = "scale(0.95)";
+          });
+
+          preview.addEventListener("dragend", (e) => {
+            e.target.style.opacity = "1";
+            e.target.style.transform = "scale(1)";
+          });
+        });
+
+        // 大圆拖拽事件
+        bigCircle.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          bigCircle.style.transform = "scale(1.05)";
+          bigCircle.style.boxShadow =
+            "0 15px 35px rgba(0,0,0,0.8), inset 0 0 25px rgba(0,0,0,0.7)";
+
+          // 添加拖拽指示器
+          const indicator = bigCircle.querySelector(".drag-indicator");
+          indicator.style.opacity = "1";
+          indicator.style.transform = "translateX(-50%) translateY(-10px)";
+        });
+
+        bigCircle.addEventListener("dragleave", () => {
+          bigCircle.style.transform = "scale(1)";
+          bigCircle.style.boxShadow =
+            "0 8px 25px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.9)";
+
+          // 隐藏拖拽指示器
+          const indicator = bigCircle.querySelector(".drag-indicator");
+          indicator.style.opacity = "0.7";
+          indicator.style.transform = "translateX(-50%)";
+        });
+
+        bigCircle.addEventListener("drop", (e) => {
+          e.preventDefault();
+          bigCircle.style.transform = "scale(1)";
+          bigCircle.style.boxShadow =
+            "0 8px 25px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.9)";
+
+          // 隐藏拖拽指示器
+          const indicator = bigCircle.querySelector(".drag-indicator");
+          indicator.style.opacity = "0.7";
+          indicator.style.transform = "translateX(-50%)";
+
+          // 获取拖拽的颜色数据
+          const colorData = e.dataTransfer.getData("color");
+          const source = e.dataTransfer.getData("source");
+          const colorType = e.dataTransfer.getData("colorType");
+
+          if (colorData) {
+            const color = JSON.parse(colorData);
+
+            // 执行颜色混合
+            mixColors(color);
+
+            // 添加混合动画
+            createMixingEffect(colorType);
+          }
+        });
+      }
+
+      // 获取预设颜色RGB值
+      function getColorValues(colorType) {
+        switch (colorType) {
+          case "red":
+            return { r: 255, g: 0, b: 0 };
+          case "green":
+            return { r: 0, g: 255, b: 0 };
+          case "blue":
+            return { r: 0, g: 0, b: 255 };
+          default:
+            return { r: 0, g: 0, b: 0 };
+        }
+      }
+
+      // 核心颜色混合算法
+      function mixColors(newColor) {
+        // 特殊处理：如果当前是白色，直接替换为新颜色
+        if (isWhite(currentColor)) {
+          currentColor = { ...newColor };
+        } else {
+          // 标准RGB相加
+          currentColor.r = Math.min(currentColor.r + newColor.r, 255);
+          currentColor.g = Math.min(currentColor.g + newColor.g, 255);
+          currentColor.b = Math.min(currentColor.b + newColor.b, 255);
+        }
+
+        updateColorDisplay();
+      }
+
+      // 判断是否为白色
+      function isWhite(color) {
+        return color.r === 255 && color.g === 255 && color.b === 255;
+      }
+
+      // 更新颜色显示
+      function updateColorDisplay() {
+        const rgb = `RGB(${currentColor.r}, ${currentColor.g}, ${currentColor.b})`;
+        const hex = rgbToHex(currentColor.r, currentColor.g, currentColor.b);
+        resultDisplay.textContent = `${rgb} ${hex}`;
+
+        // 更新背景色
+        bigCircle.style.backgroundColor = `rgb(${currentColor.r}, ${currentColor.g}, ${currentColor.b})`;
+
+        // 更新结果框背景色
+        resultDisplay.style.backgroundColor = `rgba(${currentColor.r}, ${currentColor.g}, ${currentColor.b}, 0.85)`;
+
+        // 特殊处理白色背景的文字颜色
+        if (
+          currentColor.r > 200 &&
+          currentColor.g > 200 &&
+          currentColor.b > 200
+        ) {
+          resultDisplay.style.color = "black";
+          resultDisplay.style.textShadow = "none";
+        } else {
+          resultDisplay.style.color = "white";
+          resultDisplay.style.textShadow = "0 1px 3px rgba(0,0,0,0.8)";
+        }
+      }
+
+      // 添加混合动画
+      function createMixingEffect(colorType) {
+        const effect = document.createElement("div");
+        effect.style.position = "absolute";
+        effect.style.width = "30px";
+        effect.style.height = "30px";
+        effect.style.borderRadius = "50%";
+        effect.style.top = "50%";
+        effect.style.left = "50%";
+        effect.style.transform = "translate(-50%, -50%) scale(0)";
+        effect.style.opacity = "0.7";
+        effect.style.zIndex = "5";
+        effect.style.pointerEvents = "none";
+
+        // 根据来源设置不同颜色
+        if (colorType.startsWith("custom")) {
+          const index = colorType.replace("custom", "");
+          const colorInput = document.getElementById(`color${index}`);
+          effect.style.backgroundColor = colorInput.value;
+        } else {
+          effect.style.backgroundColor = getColorValues(colorType)
+            ? `rgb(${getColorValues(colorType).r}, ${
+                getColorValues(colorType).g
+              }, ${getColorValues(colorType).b})`
+            : "white";
+        }
+
+        bigCircle.appendChild(effect);
+
+        // 粒子动画
+        setTimeout(() => {
+          effect.style.transform = "translate(-50%, -50%) scale(10)";
+          effect.style.opacity = "0";
+        }, 10);
+
+        // 移除粒子元素
+        setTimeout(() => {
+          effect.remove();
+        }, 600);
+      }
+
+      // 添加自定义颜色
+      function addColor(index) {
+        const colorInput = document.getElementById(`color${index}`);
+        const hexColor = colorInput.value;
+        const rgbColor = hexToRgb(hexColor);
+
+        if (!rgbColor) return;
+
+        // 特殊处理：如果当前是白色，直接替换为新颜色
+        if (isWhite(currentColor)) {
+          currentColor = { ...rgbColor };
+        } else {
+          // 标准RGB相加
+          currentColor.r = Math.min(currentColor.r + rgbColor.r, 255);
+          currentColor.g = Math.min(currentColor.g + rgbColor.g, 255);
+          currentColor.b = Math.min(currentColor.b + rgbColor.b, 255);
+        }
+
+        updateColorDisplay();
+
+        // 添加混合动画
+        createMixingEffect(`custom${index}`);
+      }
+
+      // 十六进制转RGB
+      function hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+        if (result) {
+          const r = parseInt(result[1], 16);
+          const g = parseInt(result[2], 16);
+          const b = parseInt(result[3], 16);
+
+          return { r, g, b };
+        }
+
+        return null;
+      }
+
+      // RGB转十六进制
+      function rgbToHex(r, g, b) {
+        return `#${componentToHex(r)}${componentToHex(g)}${componentToHex(b)}`;
+      }
+
+      function componentToHex(c) {
+        const hex = c.toString(16);
+        return hex.length == 1 ? "0" + hex : hex;
+      }
+
+      // 重置颜色
+      function resetColors() {
+        currentColor = { r: 255, g: 255, b: 255 }; // 重置为白色
+        updateColorDisplay();
+
+        // 重置颜色选择器为默认值
+        document.getElementById("color1").value = "#ff0000";
+        document.getElementById("color2").value = "#00ff00";
+        document.getElementById("color3").value = "#0000ff";
+
+        // 更新预览
+        initColorPreviews();
+      }
+    </script>
+  </body>
+</html>
