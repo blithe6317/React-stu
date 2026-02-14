@@ -107,6 +107,7 @@
         height: 60px;
         border-radius: 50%;
         cursor: grab;
+        touch-action: none;
         transition: all 0.3s ease;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5),
           inset 0 0 12px rgba(255, 255, 255, 0.2);
@@ -184,6 +185,7 @@
         border: 3px solid rgba(255, 255, 255, 0.2);
         box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
         cursor: grab;
+        touch-action: none;
         transition: all 0.3s ease;
       }
 
@@ -517,10 +519,11 @@
         preview.style.border = `3px solid ${rgb}`;
       }
 
-      // 初始化拖拽事件
+      // 初始化拖拽事件（桌面端 + 移动端）
       function initDragEvents() {
-        // 小圆拖拽事件
         const smallCircles = document.querySelectorAll(".small-circle");
+
+        // ========== 桌面端：HTML5 Drag & Drop ==========
         smallCircles.forEach((circle) => {
           circle.addEventListener("dragstart", (e) => {
             const colorType = e.target.dataset.color;
@@ -530,7 +533,6 @@
             e.dataTransfer.setData("source", "preset");
             e.dataTransfer.setData("colorType", colorType);
 
-            // 拖拽视觉反馈
             e.target.style.opacity = "0.7";
             e.target.style.transform = "scale(0.95)";
           });
@@ -541,7 +543,6 @@
           });
         });
 
-        // 自定义颜色预览拖拽事件
         colorPreviews.forEach((preview, index) => {
           preview.addEventListener("dragstart", (e) => {
             const colorInput = document.getElementById(`color${index + 1}`);
@@ -551,7 +552,6 @@
             e.dataTransfer.setData("source", "custom");
             e.dataTransfer.setData("colorType", `custom${index}`);
 
-            // 拖拽视觉反馈
             e.target.style.opacity = "0.7";
             e.target.style.transform = "scale(0.95)";
           });
@@ -562,56 +562,163 @@
           });
         });
 
-        // 大圆拖拽事件
         bigCircle.addEventListener("dragover", (e) => {
           e.preventDefault();
-          bigCircle.style.transform = "scale(1.05)";
-          bigCircle.style.boxShadow =
-            "0 15px 35px rgba(0,0,0,0.8), inset 0 0 25px rgba(0,0,0,0.7)";
-
-          // 添加拖拽指示器
-          const indicator = bigCircle.querySelector(".drag-indicator");
-          indicator.style.opacity = "1";
-          indicator.style.transform = "translateX(-50%) translateY(-10px)";
+          showDropHighlight();
         });
 
         bigCircle.addEventListener("dragleave", () => {
-          bigCircle.style.transform = "scale(1)";
-          bigCircle.style.boxShadow =
-            "0 8px 25px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.9)";
-
-          // 隐藏拖拽指示器
-          const indicator = bigCircle.querySelector(".drag-indicator");
-          indicator.style.opacity = "0.7";
-          indicator.style.transform = "translateX(-50%)";
+          hideDropHighlight();
         });
 
         bigCircle.addEventListener("drop", (e) => {
           e.preventDefault();
-          bigCircle.style.transform = "scale(1)";
-          bigCircle.style.boxShadow =
-            "0 8px 25px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.9)";
+          hideDropHighlight();
 
-          // 隐藏拖拽指示器
-          const indicator = bigCircle.querySelector(".drag-indicator");
-          indicator.style.opacity = "0.7";
-          indicator.style.transform = "translateX(-50%)";
-
-          // 获取拖拽的颜色数据
           const colorData = e.dataTransfer.getData("color");
-          const source = e.dataTransfer.getData("source");
           const colorType = e.dataTransfer.getData("colorType");
 
           if (colorData) {
             const color = JSON.parse(colorData);
-
-            // 执行颜色混合
             mixColors(color);
-
-            // 添加混合动画
             createMixingEffect(colorType);
           }
         });
+
+        // ========== 移动端：Touch 事件 ==========
+        let touchDragData = null; // 触摸拖拽时暂存的颜色数据
+        let touchClone = null; // 跟随手指的克隆元素
+        let touchSource = null; // 触摸拖拽的源元素
+
+        // 为小圆添加触摸事件
+        smallCircles.forEach((circle) => {
+          circle.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            const colorType = circle.dataset.color;
+            touchDragData = {
+              color: getColorValues(colorType),
+              colorType: colorType,
+            };
+            touchSource = circle;
+            circle.style.opacity = "0.7";
+            circle.style.transform = "scale(0.95)";
+            createTouchClone(e, circle);
+          }, { passive: false });
+        });
+
+        // 为自定义颜色预览添加触摸事件
+        colorPreviews.forEach((preview, index) => {
+          preview.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            const colorInput = document.getElementById(`color${index + 1}`);
+            const color = hexToRgb(colorInput.value);
+            touchDragData = {
+              color: color,
+              colorType: `custom${index + 1}`,
+            };
+            touchSource = preview;
+            preview.style.opacity = "0.7";
+            preview.style.transform = "scale(0.95)";
+            createTouchClone(e, preview);
+          }, { passive: false });
+        });
+
+        // 创建跟随手指的克隆元素
+        function createTouchClone(e, sourceEl) {
+          touchClone = sourceEl.cloneNode(true);
+          touchClone.style.position = "fixed";
+          touchClone.style.zIndex = "9999";
+          touchClone.style.pointerEvents = "none";
+          touchClone.style.opacity = "0.8";
+          touchClone.style.width = sourceEl.offsetWidth + "px";
+          touchClone.style.height = sourceEl.offsetHeight + "px";
+          touchClone.style.borderRadius = "50%";
+          touchClone.style.boxShadow = "0 8px 25px rgba(0,0,0,0.6)";
+          touchClone.style.transition = "none";
+
+          const touch = e.touches[0];
+          touchClone.style.left = touch.clientX - sourceEl.offsetWidth / 2 + "px";
+          touchClone.style.top = touch.clientY - sourceEl.offsetHeight / 2 + "px";
+
+          document.body.appendChild(touchClone);
+        }
+
+        // 全局 touchmove：移动克隆元素 + 检测是否在大圆上方
+        document.addEventListener("touchmove", (e) => {
+          if (!touchDragData || !touchClone) return;
+          e.preventDefault();
+
+          const touch = e.touches[0];
+          touchClone.style.left = touch.clientX - touchClone.offsetWidth / 2 + "px";
+          touchClone.style.top = touch.clientY - touchClone.offsetHeight / 2 + "px";
+
+          // 检测手指是否在大圆上方
+          if (isTouchOverBigCircle(touch)) {
+            showDropHighlight();
+          } else {
+            hideDropHighlight();
+          }
+        }, { passive: false });
+
+        // 全局 touchend：检测是否释放在大圆上，执行混合
+        document.addEventListener("touchend", (e) => {
+          if (!touchDragData) return;
+
+          // 恢复源元素样式
+          if (touchSource) {
+            touchSource.style.opacity = "1";
+            touchSource.style.transform = "scale(1)";
+            touchSource = null;
+          }
+
+          // 移除克隆元素
+          if (touchClone) {
+            touchClone.remove();
+            touchClone = null;
+          }
+
+          hideDropHighlight();
+
+          // 检测释放位置是否在大圆内
+          const touch = e.changedTouches[0];
+          if (isTouchOverBigCircle(touch)) {
+            mixColors(touchDragData.color);
+            createMixingEffect(touchDragData.colorType);
+          }
+
+          touchDragData = null;
+        });
+
+        // 判断触摸点是否在大圆区域内
+        function isTouchOverBigCircle(touch) {
+          const rect = bigCircle.getBoundingClientRect();
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+          const radius = rect.width / 2;
+          const dx = touch.clientX - cx;
+          const dy = touch.clientY - cy;
+          return dx * dx + dy * dy <= radius * radius;
+        }
+      }
+
+      // 大圆高亮（拖拽悬停时）
+      function showDropHighlight() {
+        bigCircle.style.transform = "scale(1.05)";
+        bigCircle.style.boxShadow =
+          "0 15px 35px rgba(0,0,0,0.8), inset 0 0 25px rgba(0,0,0,0.7)";
+        const indicator = bigCircle.querySelector(".drag-indicator");
+        indicator.style.opacity = "1";
+        indicator.style.transform = "translateX(-50%) translateY(-10px)";
+      }
+
+      // 大圆取消高亮
+      function hideDropHighlight() {
+        bigCircle.style.transform = "scale(1)";
+        bigCircle.style.boxShadow =
+          "0 8px 25px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.9)";
+        const indicator = bigCircle.querySelector(".drag-indicator");
+        indicator.style.opacity = "0.7";
+        indicator.style.transform = "translateX(-50%)";
       }
 
       // 获取预设颜色RGB值
