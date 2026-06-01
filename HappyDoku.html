@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>🧩 快乐数独</title>
+  <style>
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+      touch-action: manipulation;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #ffeef8 0%, #fff5e6 40%, #e8f8f5 70%, #fff0f5 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 0;
+      color: #5a4a6a;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      padding-left: env(safe-area-inset-left, 0px);
+      padding-right: env(safe-area-inset-right, 0px);
+    }
+
+    /* ===== App Container — full viewport ===== */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      padding: 8px 0 max(env(safe-area-inset-bottom, 12px), 12px) 0;
+      overflow: hidden;
+    }
+
+    /* ===== Header ===== */
+    .header {
+      text-align: center;
+      margin-bottom: 4px;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 3px;
+      background: linear-gradient(90deg, #ff7eb3, #ff758c, #ff7eb3, #a18cd1);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 3s linear infinite;
+      margin-bottom: 2px;
+    }
+    @keyframes shimmer {
+      0% { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+    .header p {
+      font-size: 0.75rem;
+      color: #b8a0c8;
+      letter-spacing: 1px;
+    }
+
+    /* ===== Main Card ===== */
+    .game-card {
+      background: rgba(255,255,255,0.7);
+      border: 2px solid rgba(255,200,220,0.5);
+      border-radius: 24px;
+      padding: 10px 12px 12px;
+      box-shadow: 0 4px 24px rgba(200,150,200,0.15);
+      backdrop-filter: blur(10px);
+      width: 100%;
+      max-width: 520px;
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ===== Top Bar: difficulty + timer ===== */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      gap: 6px;
+      flex-wrap: nowrap;
+      flex-shrink: 0;
+    }
+
+    .difficulty-group {
+      display: flex;
+      gap: 5px;
+    }
+    .diff-btn {
+      padding: 6px 10px;
+      border-radius: 20px;
+      border: 2px solid rgba(255,150,180,0.3);
+      background: rgba(255,255,255,0.6);
+      color: #a080b0;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.25s;
+      font-weight: 600;
+      touch-action: manipulation;
+    }
+    .diff-btn:hover { border-color: #ff7eb3; color: #ff7eb3; }
+    .diff-btn.active {
+      background: linear-gradient(135deg, #ff7eb3, #ff758c);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(255,126,179,0.4);
+    }
+
+    .timer-box {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(160,128,176,0.1);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #a18cd1;
+      letter-spacing: 2px;
+      min-width: 80px;
+      justify-content: center;
+    }
+    .timer-icon { font-size: 1rem; }
+
+    /* ===== Sudoku Board ===== */
+    .board-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 8px;
+      flex-shrink: 0;
+    }
+
+    #sudoku-board {
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      grid-template-rows: repeat(9, 1fr);
+      border: 3px solid #d4a0c0;
+      border-radius: 12px;
+      overflow: hidden;
+      width: min(90vw, calc(90vh - 220px), 460px);
+      height: min(90vw, calc(90vh - 220px), 460px);
+      user-select: none;
+      touch-action: manipulation;
+      /* Pastel background */
+      background: #fce4ec;
+    }
+
+    .cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(1.05rem, 4vw, 1.5rem);
+      font-weight: 700;
+      cursor: pointer;
+      border-right: 1px solid rgba(200,160,180,0.3);
+      border-bottom: 1px solid rgba(200,160,180,0.3);
+      transition: background 0.15s, transform 0.15s;
+      position: relative;
+      outline: none;
+      touch-action: manipulation;
+      /* Alternating box colors for child-friendly look */
+      min-height: 0;
+    }
+
+    /* 3x3 box background colors — warm pastels */
+    .cell[data-box="0"] { background: #fce4ec; }
+    .cell[data-box="1"] { background: #e3f2fd; }
+    .cell[data-box="2"] { background: #fff8e1; }
+    .cell[data-box="3"] { background: #e8f5e9; }
+    .cell[data-box="4"] { background: #f3e5f5; }
+    .cell[data-box="5"] { background: #fff3e0; }
+    .cell[data-box="6"] { background: #e0f7fa; }
+    .cell[data-box="7"] { background: #fce4ec; }
+    .cell[data-box="8"] { background: #f1f8e9; }
+
+    /* Right thick border after columns 3, 6 */
+    .cell[data-col="2"], .cell[data-col="5"] {
+      border-right: 3px solid rgba(180,120,160,0.5);
+    }
+    /* Bottom thick border after rows 3, 6 */
+    .cell[data-row="2"], .cell[data-row="5"] {
+      border-bottom: 3px solid rgba(180,120,160,0.5);
+    }
+    /* Remove right border for last col */
+    .cell[data-col="8"] { border-right: none; }
+    /* Remove bottom border for last row */
+    .cell[data-row="8"] { border-bottom: none; }
+
+    /* Cell states */
+    .cell.given {
+      color: #5a4a6a;
+      font-weight: 800;
+    }
+    .cell.user {
+      color: #7c4dff;
+      font-weight: 700;
+    }
+    .cell.error {
+      color: #ff9800 !important;
+      background: rgba(255,152,0,0.1) !important;
+    }
+    .cell.selected {
+      background: rgba(255,126,179,0.35) !important;
+      animation: cellPulse 0.8s ease-in-out infinite;
+    }
+    @keyframes cellPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+    .cell.highlight-group {
+      background: rgba(161,140,209,0.12) !important;
+    }
+    .cell.highlight-same {
+      background: rgba(255,126,179,0.18) !important;
+    }
+    .cell:hover:not(.given):not(.selected) {
+      background: rgba(255,126,179,0.1);
+    }
+
+    /* Bounce animation for correct input */
+    .cell.bounce {
+      animation: cellBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes cellBounce {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.2); }
+      70% { transform: scale(0.95); }
+      100% { transform: scale(1); }
+    }
+
+    /* ===== Action Buttons — two rows ===== */
+    .action-bar {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-bottom: 8px;
+      flex-shrink: 0;
+    }
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 8px 4px;
+      min-height: 48px;
+      border-radius: 16px;
+      border: 2px solid rgba(200,160,220,0.35);
+      background: rgba(255,255,255,0.7);
+      color: #8a6aaa;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      touch-action: manipulation;
+    }
+    .action-btn .icon { font-size: 1.25rem; }
+    .action-btn:hover {
+      border-color: #ff7eb3;
+      color: #ff7eb3;
+      background: rgba(255,126,179,0.08);
+    }
+    .action-btn:active {
+      transform: scale(0.95);
+    }
+    .action-btn.primary {
+      background: linear-gradient(135deg, #ff7eb3, #ff758c);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(255,126,179,0.35);
+    }
+    .action-btn.primary:hover {
+      filter: brightness(1.08);
+      color: #fff;
+    }
+    .action-btn.secondary {
+      background: rgba(255,255,255,0.5);
+      border-color: rgba(200,160,220,0.25);
+      color: #b0a0c0;
+    }
+
+    /* ===== Number Pad ===== */
+    .num-pad {
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      gap: 5px;
+      flex-shrink: 0;
+    }
+    .num-btn {
+      height: 50px;
+      border-radius: 14px;
+      border: 2px solid transparent;
+      color: #fff;
+      font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+    /* Rainbow colors for number buttons */
+    .num-btn[data-num="1"] { background: #ff7eb3; }
+    .num-btn[data-num="2"] { background: #ff9a76; }
+    .num-btn[data-num="3"] { background: #ffd56b; }
+    .num-btn[data-num="4"] { background: #a8e063; }
+    .num-btn[data-num="5"] { background: #56d9b0; }
+    .num-btn[data-num="6"] { background: #56ccf2; }
+    .num-btn[data-num="7"] { background: #7c8cf8; }
+    .num-btn[data-num="8"] { background: #a18cd1; }
+    .num-btn[data-num="9"] { background: #d4a0e0; }
+
+    .num-btn:active {
+      transform: scale(0.92);
+      filter: brightness(1.1);
+    }
+    .num-btn.exhausted {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    /* ===== Status Bar ===== */
+    .status-bar {
+      text-align: center;
+      font-size: 0.82rem;
+      color: #b0a0c0;
+      min-height: 20px;
+      margin-top: 4px;
+      flex-shrink: 0;
+    }
+    .status-bar.error-msg { color: #ff9800; }
+    .status-bar.success-msg { color: #66bb6a; font-weight: 600; }
+
+    /* ===== Victory Overlay ===== */
+    #victory-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(255,220,240,0.7);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    #victory-overlay.show { display: flex; }
+
+    .victory-card {
+      background: linear-gradient(135deg, #fff0f5, #f5f0ff, #f0f8ff);
+      border: 3px solid rgba(255,126,179,0.4);
+      border-radius: 28px;
+      padding: 32px 36px;
+      text-align: center;
+      box-shadow: 0 16px 48px rgba(200,150,200,0.3);
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+    .victory-emoji { font-size: 4rem; margin-bottom: 8px; }
+    .victory-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, #ff7eb3, #a18cd1, #56ccf2, #66bb6a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+    .victory-time {
+      font-size: 1.1rem;
+      color: #a080b0;
+      margin-bottom: 20px;
+    }
+    .victory-btn {
+      padding: 14px 36px;
+      border-radius: 28px;
+      border: none;
+      background: linear-gradient(135deg, #ff7eb3, #ff758c);
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(255,126,179,0.4);
+      transition: filter 0.2s;
+      touch-action: manipulation;
+    }
+    .victory-btn:hover { filter: brightness(1.1); }
+    .victory-btn:active { transform: scale(0.96); }
+
+    /* Confetti canvas */
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 99;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-height: 680px) {
+      .header h1 { font-size: 1.2rem; margin-bottom: 0; }
+      .header p { display: none; }
+      .header { margin-bottom: 2px; }
+      .game-card { padding: 6px 8px 8px; border-radius: 18px; }
+      .top-bar { margin-bottom: 4px; }
+      .board-wrapper { margin-bottom: 4px; }
+      .action-bar { margin-bottom: 4px; gap: 4px; }
+      .action-btn { padding: 5px 4px; min-height: 42px; border-radius: 12px; }
+      .action-btn .icon { font-size: 1.1rem; }
+      .action-btn span:not(.icon) { font-size: 0.65rem; }
+      .num-pad { gap: 4px; }
+      .num-btn { height: 44px; border-radius: 12px; }
+      .status-bar { margin-top: 2px; min-height: 16px; font-size: 0.75rem; }
+    }
+
+    @media (max-height: 580px) {
+      .app-container { padding-top: 4px; }
+      .header { margin-bottom: 0; }
+      .game-card { padding: 4px 6px 6px; }
+      .top-bar { margin-bottom: 2px; }
+      .board-wrapper { margin-bottom: 2px; }
+      .action-btn { padding: 4px 2px; min-height: 38px; }
+      .num-btn { height: 38px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Confetti canvas (behind overlay) -->
+<canvas id="confetti-canvas"></canvas>
+
+<!-- Victory Overlay -->
+<div id="victory-overlay">
+  <div class="victory-card">
+    <div class="victory-emoji">🎉🌟🎊</div>
+    <div class="victory-title">太棒了！</div>
+    <div class="victory-time" id="victory-time-text">用时 00:00</div>
+    <button class="victory-btn" onclick="closeVictory()">🔄 再来一局</button>
+  </div>
+</div>
+
+<!-- App Container -->
+<div class="app-container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>🧩 快乐数独</h1>
+    <p>Fun Sudoku · 开心玩数独</p>
+  </div>
+
+  <!-- Main Card -->
+  <div class="game-card">
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="difficulty-group">
+        <button class="diff-btn" data-diff="easy" onclick="setDifficulty('easy')">⭐简单</button>
+        <button class="diff-btn active" data-diff="medium" onclick="setDifficulty('medium')">⭐⭐中等</button>
+        <button class="diff-btn" data-diff="hard" onclick="setDifficulty('hard')">⭐⭐⭐困难</button>
+      </div>
+      <div class="timer-box">
+        <span class="timer-icon">⏱</span>
+        <span id="timer-display">00:00</span>
+      </div>
+    </div>
+
+    <!-- Sudoku Board -->
+    <div class="board-wrapper">
+      <div id="sudoku-board"></div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-bar">
+      <button class="action-btn primary" onclick="newGame()">
+        <span class="icon">🔄</span><span>重新开始</span>
+      </button>
+      <button class="action-btn" onclick="undoMove()">
+        <span class="icon">↩️</span><span>撤销</span>
+      </button>
+      <button class="action-btn" onclick="giveHint()">
+        <span class="icon">💡</span><span>提示</span>
+      </button>
+      <button class="action-btn secondary" onclick="checkBoard()">
+        <span class="icon">🔍</span><span>检查</span>
+      </button>
+      <button class="action-btn" onclick="eraseCell()">
+        <span class="icon">🧹</span><span>擦除</span>
+      </button>
+    </div>
+
+    <!-- Number Pad -->
+    <div class="num-pad" id="num-pad">
+      <!-- rendered by JS -->
+    </div>
+
+    <!-- Status -->
+    <div class="status-bar" id="status-bar">选择一个格子开始游戏 🎯</div>
+
+  </div>
+</div>
+
+<script>
+/* ==========================================================
+   SUDOKU ENGINE
+   ========================================================== */
+
+/**
+ * Generates a complete valid Sudoku solution using backtracking.
+ * @returns {number[][]} 9x9 array (1-9)
+ */
+function generateSolution() {
+  const board = Array.from({ length: 9 }, () => Array(9).fill(0));
+  solveSudoku(board, true);
+  return board;
+}
+
+/**
+ * Checks if placing `num` at (row, col) is valid.
+ * @param {number[][]} board
+ * @param {number} row
+ * @param {number} col
+ * @param {number} num
+ * @returns {boolean}
+ */
+function isValid(board, row, col, num) {
+  // Check row
+  for (let c = 0; c < 9; c++) {
+    if (board[row][c] === num) return false;
+  }
+  // Check col
+  for (let r = 0; r < 9; r++) {
+    if (board[r][col] === num) return false;
+  }
+  // Check 3x3 box
+  const br = Math.floor(row / 3) * 3;
+  const bc = Math.floor(col / 3) * 3;
+  for (let r = br; r < br + 3; r++) {
+    for (let c = bc; c < bc + 3; c++) {
+      if (board[r][c] === num) return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Solves a Sudoku board in-place using backtracking.
+ * @param {number[][]} board - mutated in-place
+ * @param {boolean} randomize - shuffle candidates for generation
+ * @returns {boolean} true if solved
+ */
+function solveSudoku(board, randomize = false) {
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      if (board[r][c] === 0) {
+        let candidates = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        if (randomize) candidates = shuffle(candidates);
+        for (const num of candidates) {
+          if (isValid(board, r, c, num)) {
+            board[r][c] = num;
+            if (solveSudoku(board, randomize)) return true;
+            board[r][c] = 0;
+          }
+        }
+        return false; // no valid number found → backtrack
+      }
+    }
+  }
+  return true; // all cells filled
+}
+
+/**
+ * Counts the number of solutions for a board (stops at 2 for efficiency).
+ * @param {number[][]} board
+ * @param {{count: number}} result - accumulator
+ * @returns {void}
+ */
+function countSolutions(board, result) {
+  if (result.count >= 2) return;
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      if (board[r][c] === 0) {
+        for (let num = 1; num <= 9; num++) {
+          if (isValid(board, r, c, num)) {
+            board[r][c] = num;
+            countSolutions(board, result);
+            board[r][c] = 0;
+          }
+        }
+        return; // explored all candidates for this cell
+      }
+    }
+  }
+  result.count++; // board fully filled → one solution found
+}
+
+/**
+ * Generates a puzzle with a unique solution by removing clues from a
+ * complete solution.
+ * @param {number} clues - number of clues to keep
+ * @returns {{ puzzle: number[][], solution: number[][] }}
+ */
+function generatePuzzle(clues) {
+  const solution = generateSolution();
+  // Deep-copy solution as puzzle
+  const puzzle = solution.map(row => [...row]);
+
+  // Build list of all cell indices and shuffle
+  const cells = shuffle(Array.from({ length: 81 }, (_, i) => i));
+
+  let removed = 0;
+  const target = 81 - clues;
+
+  for (const idx of cells) {
+    if (removed >= target) break;
+    const r = Math.floor(idx / 9);
+    const c = idx % 9;
+    const backup = puzzle[r][c];
+    puzzle[r][c] = 0;
+
+    // Check uniqueness
+    const copy = puzzle.map(row => [...row]);
+    const result = { count: 0 };
+    countSolutions(copy, result);
+
+    if (result.count === 1) {
+      removed++;
+    } else {
+      puzzle[r][c] = backup; // restore if not unique
+    }
+  }
+
+  return { puzzle, solution };
+}
+
+/**
+ * Fisher-Yates shuffle (in-place, returns array).
+ * @template T
+ * @param {T[]} arr
+ * @returns {T[]}
+ */
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+/* ==========================================================
+   GAME STATE
+   ========================================================== */
+
+/** @type {number[][]} */
+let puzzleGrid = [];       // 0 = empty
+/** @type {number[][]} */
+let solutionGrid = [];     // correct answer
+/** @type {number[][]} */
+let userGrid = [];         // user's current input (0 = empty)
+
+/** @type {boolean[][]} */
+let givenMask = [];        // true = given (immutable) cell
+
+/** Currently selected cell */
+let selectedRow = -1;
+let selectedCol = -1;
+
+/** Undo stack: each entry is { r, c, prev, next } */
+let undoStack = [];
+
+/** Difficulty */
+let difficulty = 'medium';
+const CLUE_MAP = { easy: 50, medium: 35, hard: 25 };
+
+/** Timer */
+let timerInterval = null;
+let timerSeconds = 0;
+let gameActive = false;
+
+/* ==========================================================
+   TIMER
+   ========================================================== */
+
+function startTimer() {
+  stopTimer();
+  timerSeconds = 0;
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timerSeconds++;
+    updateTimerDisplay();
+  }, 1000);
+  gameActive = true;
+}
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
+function updateTimerDisplay() {
+  const mm = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+  const ss = String(timerSeconds % 60).padStart(2, '0');
+  document.getElementById('timer-display').textContent = `${mm}:${ss}`;
+}
+
+/* ==========================================================
+   BOARD RENDERING
+   ========================================================== */
+
+function renderBoard() {
+  const board = document.getElementById('sudoku-board');
+  board.innerHTML = '';
+
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+      cell.dataset.box = Math.floor(r / 3) * 3 + Math.floor(c / 3);
+      cell.tabIndex = 0;
+
+      // Assign class
+      if (givenMask[r][c]) {
+        cell.classList.add('given');
+        cell.textContent = puzzleGrid[r][c];
+      } else if (userGrid[r][c] !== 0) {
+        cell.classList.add('user');
+        cell.textContent = userGrid[r][c];
+        // Real-time error highlight
+        if (userGrid[r][c] !== solutionGrid[r][c]) {
+          cell.classList.add('error');
+        }
+      }
+
+      cell.addEventListener('click', () => selectCell(r, c));
+      board.appendChild(cell);
+    }
+  }
+
+  applyHighlight();
+  renderNumPad();
+}
+
+/**
+ * Update a single cell's visual without full re-render.
+ * @param {number} r
+ * @param {number} c
+ */
+function updateCellDisplay(r, c) {
+  const cell = getCellElement(r, c);
+  if (!cell) return;
+
+  // Reset classes (keep positional ones)
+  cell.className = 'cell';
+  cell.dataset.row = r;
+  cell.dataset.col = c;
+  cell.dataset.box = Math.floor(r / 3) * 3 + Math.floor(c / 3);
+
+  if (givenMask[r][c]) {
+    cell.classList.add('given');
+    cell.textContent = puzzleGrid[r][c];
+  } else {
+    cell.textContent = userGrid[r][c] !== 0 ? userGrid[r][c] : '';
+    if (userGrid[r][c] !== 0) {
+      cell.classList.add('user');
+      if (userGrid[r][c] !== solutionGrid[r][c]) {
+        cell.classList.add('error');
+      }
+    }
+  }
+
+  applyHighlight();
+  renderNumPad();
+}
+
+function getCellElement(r, c) {
+  return document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+}
+
+/**
+ * Applies selection + group highlight to all cells.
+ */
+function applyHighlight() {
+  const cells = document.querySelectorAll('.cell');
+  const selVal = (selectedRow >= 0 && selectedCol >= 0)
+    ? (givenMask[selectedRow][selectedCol]
+        ? puzzleGrid[selectedRow][selectedCol]
+        : userGrid[selectedRow][selectedCol])
+    : 0;
+
+  cells.forEach(cell => {
+    cell.classList.remove('selected', 'highlight-group', 'highlight-same');
+    const r = parseInt(cell.dataset.row);
+    const c = parseInt(cell.dataset.col);
+
+    if (r === selectedRow && c === selectedCol) {
+      cell.classList.add('selected');
+    } else if (selectedRow >= 0) {
+      const sameBox = Math.floor(r / 3) === Math.floor(selectedRow / 3)
+                   && Math.floor(c / 3) === Math.floor(selectedCol / 3);
+      if (r === selectedRow || c === selectedCol || sameBox) {
+        cell.classList.add('highlight-group');
+      }
+      // Same number highlight
+      if (selVal !== 0) {
+        const cellVal = givenMask[r][c] ? puzzleGrid[r][c] : userGrid[r][c];
+        if (cellVal === selVal) {
+          cell.classList.add('highlight-same');
+        }
+      }
+    }
+  });
+}
+
+/* ==========================================================
+   NUMBER PAD
+   ========================================================== */
+
+function renderNumPad() {
+  const pad = document.getElementById('num-pad');
+  pad.innerHTML = '';
+
+  // Count how many of each digit are placed
+  const counts = Array(10).fill(0); // index 1-9
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const v = givenMask[r][c] ? puzzleGrid[r][c] : userGrid[r][c];
+      if (v > 0) counts[v]++;
+    }
+  }
+
+  for (let n = 1; n <= 9; n++) {
+    const btn = document.createElement('button');
+    btn.className = 'num-btn';
+    btn.dataset.num = n;
+    btn.textContent = n;
+    if (counts[n] >= 9) btn.classList.add('exhausted');
+    btn.addEventListener('click', () => inputNumber(n));
+    pad.appendChild(btn);
+  }
+}
+
+/* ==========================================================
+   CELL INTERACTION
+   ========================================================== */
+
+function selectCell(r, c) {
+  selectedRow = r;
+  selectedCol = c;
+  applyHighlight();
+  setStatus('');
+}
+
+function inputNumber(num) {
+  if (selectedRow < 0 || selectedCol < 0) {
+    setStatus('请先选择一个格子 🎯', 'error');
+    return;
+  }
+  if (givenMask[selectedRow][selectedCol]) {
+    setStatus('题目给定的数字不可修改哦', 'error');
+    return;
+  }
+
+  const prev = userGrid[selectedRow][selectedCol];
+  if (prev === num) return; // no change
+
+  // Push undo
+  undoStack.push({ r: selectedRow, c: selectedCol, prev, next: num });
+
+  userGrid[selectedRow][selectedCol] = num;
+  updateCellDisplay(selectedRow, selectedCol);
+  setStatus('');
+
+  // Play bounce animation on correct input
+  if (num === solutionGrid[selectedRow][selectedCol]) {
+    const cell = getCellElement(selectedRow, selectedCol);
+    if (cell) {
+      cell.classList.remove('bounce');
+      // Force reflow to restart animation
+      void cell.offsetWidth;
+      cell.classList.add('bounce');
+    }
+  }
+
+  checkVictory();
+}
+
+function eraseCell() {
+  if (selectedRow < 0 || selectedCol < 0) return;
+  if (givenMask[selectedRow][selectedCol]) {
+    setStatus('题目给定的数字不可修改哦', 'error');
+    return;
+  }
+  const prev = userGrid[selectedRow][selectedCol];
+  if (prev === 0) return;
+
+  undoStack.push({ r: selectedRow, c: selectedCol, prev, next: 0 });
+  userGrid[selectedRow][selectedCol] = 0;
+  updateCellDisplay(selectedRow, selectedCol);
+  setStatus('');
+}
+
+/* ==========================================================
+   KEYBOARD SUPPORT
+   ========================================================== */
+
+document.addEventListener('keydown', (e) => {
+  if (!gameActive) return;
+
+  // Arrow keys for navigation
+  if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
+    e.preventDefault();
+    let r = selectedRow < 0 ? 0 : selectedRow;
+    let c = selectedCol < 0 ? 0 : selectedCol;
+    if (e.key === 'ArrowUp')    r = Math.max(0, r - 1);
+    if (e.key === 'ArrowDown')  r = Math.min(8, r + 1);
+    if (e.key === 'ArrowLeft')  c = Math.max(0, c - 1);
+    if (e.key === 'ArrowRight') c = Math.min(8, c + 1);
+    selectCell(r, c);
+    return;
+  }
+
+  const digit = parseInt(e.key);
+  if (digit >= 1 && digit <= 9) {
+    inputNumber(digit);
+    return;
+  }
+  if (e.key === 'Delete' || e.key === 'Backspace') {
+    eraseCell();
+  }
+  if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    undoMove();
+  }
+});
+
+/* ==========================================================
+   GAME ACTIONS
+   ========================================================== */
+
+function undoMove() {
+  if (undoStack.length === 0) {
+    setStatus('没有可撤销的操作', 'error');
+    return;
+  }
+  const { r, c, prev } = undoStack.pop();
+  userGrid[r][c] = prev;
+  selectedRow = r;
+  selectedCol = c;
+  updateCellDisplay(r, c);
+  setStatus('已撤销上一步 ↩️');
+}
+
+function giveHint() {
+  if (selectedRow < 0 || selectedCol < 0) {
+    setStatus('请先选择一个格子 🎯', 'error');
+    return;
+  }
+  if (givenMask[selectedRow][selectedCol]) {
+    setStatus('该格子已是题目给定', 'error');
+    return;
+  }
+  const correct = solutionGrid[selectedRow][selectedCol];
+  const prev = userGrid[selectedRow][selectedCol];
+  if (prev === correct) {
+    setStatus('该格子已经正确啦！', 'success');
+    return;
+  }
+  undoStack.push({ r: selectedRow, c: selectedCol, prev, next: correct });
+  userGrid[selectedRow][selectedCol] = correct;
+  updateCellDisplay(selectedRow, selectedCol);
+
+  // Play bounce animation on hint
+  const cell = getCellElement(selectedRow, selectedCol);
+  if (cell) {
+    cell.classList.remove('bounce');
+    void cell.offsetWidth;
+    cell.classList.add('bounce');
+  }
+
+  setStatus('💡 已填入提示答案', 'success');
+  checkVictory();
+}
+
+function checkBoard() {
+  let errorCount = 0;
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      if (!givenMask[r][c] && userGrid[r][c] !== 0
+          && userGrid[r][c] !== solutionGrid[r][c]) {
+        errorCount++;
+      }
+    }
+  }
+  renderBoard(); // re-render to show all errors
+  if (errorCount === 0) {
+    setStatus('✅ 目前没有错误，继续加油！', 'success');
+  } else {
+    setStatus(`🧡 发现 ${errorCount} 个小错误，用橙色标注了哦`, 'error');
+  }
+}
+
+function checkVictory() {
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const val = givenMask[r][c] ? puzzleGrid[r][c] : userGrid[r][c];
+      if (val !== solutionGrid[r][c]) return;
+    }
+  }
+  // All cells match solution!
+  stopTimer();
+  gameActive = false;
+  showVictory();
+}
+
+/* ==========================================================
+   VICTORY
+   ========================================================== */
+
+function showVictory() {
+  const mm = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+  const ss = String(timerSeconds % 60).padStart(2, '0');
+  document.getElementById('victory-time-text').textContent = `用时 ${mm}:${ss}`;
+  document.getElementById('victory-overlay').classList.add('show');
+  launchConfetti();
+}
+
+function closeVictory() {
+  document.getElementById('victory-overlay').classList.remove('show');
+  stopConfetti();
+  newGame();
+}
+
+/* ==========================================================
+   CONFETTI
+   ========================================================== */
+
+let confettiAnimId = null;
+const confettiParticles = [];
+
+function launchConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  confettiParticles.length = 0;
+
+  const colors = ['#ff7eb3','#ff758c','#a18cd1','#ffd56b','#56ccf2','#66bb6a','#ff9a76','#d4a0e0','#56d9b0','#a8e063'];
+  for (let i = 0; i < 300; i++) {
+    confettiParticles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height - canvas.height,
+      w: Math.random() * 12 + 6,
+      h: Math.random() * 6 + 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      angle: Math.random() * Math.PI * 2,
+      spin: (Math.random() - 0.5) * 0.2,
+      vy: Math.random() * 3 + 1.5,
+      vx: (Math.random() - 0.5) * 2.5,
+      shape: Math.random() > 0.5 ? 'rect' : 'circle',
+    });
+  }
+
+  function frame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    for (const p of confettiParticles) {
+      p.y += p.vy;
+      p.x += p.vx;
+      p.angle += p.spin;
+      if (p.y < canvas.height + 20) alive = true;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.angle);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = 0.9;
+      if (p.shape === 'circle') {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.w / 3, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      }
+      ctx.restore();
+    }
+    if (alive) confettiAnimId = requestAnimationFrame(frame);
+    else stopConfetti();
+  }
+  confettiAnimId = requestAnimationFrame(frame);
+}
+
+function stopConfetti() {
+  if (confettiAnimId) {
+    cancelAnimationFrame(confettiAnimId);
+    confettiAnimId = null;
+  }
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+/* ==========================================================
+   NEW GAME & DIFFICULTY
+   ========================================================== */
+
+function setDifficulty(diff) {
+  difficulty = diff;
+  document.querySelectorAll('.diff-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.diff === diff);
+  });
+  newGame();
+}
+
+function newGame() {
+  stopTimer();
+  stopConfetti();
+  undoStack = [];
+  selectedRow = -1;
+  selectedCol = -1;
+
+  setStatus('生成题目中… 🧩');
+
+  // Use setTimeout to let UI update before heavy computation
+  setTimeout(() => {
+    const clues = CLUE_MAP[difficulty] || 35;
+    const { puzzle, solution } = generatePuzzle(clues);
+
+    puzzleGrid = puzzle;
+    solutionGrid = solution;
+    userGrid = Array.from({ length: 9 }, () => Array(9).fill(0));
+    givenMask = Array.from({ length: 9 }, (_, r) =>
+      Array.from({ length: 9 }, (__, c) => puzzle[r][c] !== 0)
+    );
+
+    renderBoard();
+    startTimer();
+    setStatus('选择一个格子开始游戏 🎯');
+  }, 30);
+}
+
+/* ==========================================================
+   STATUS HELPER
+   ========================================================== */
+
+function setStatus(msg, type = '') {
+  const el = document.getElementById('status-bar');
+  el.textContent = msg;
+  el.className = 'status-bar';
+  if (type === 'error')   el.classList.add('error-msg');
+  if (type === 'success') el.classList.add('success-msg');
+}
+
+/* ==========================================================
+   PREVENT PULL-TO-REFRESH / ELASTIC SCROLL ON MOBILE
+   ========================================================== */
+
+document.addEventListener('touchmove', function(e) {
+  if (e.target.closest('#sudoku-board') || e.target.closest('.num-pad') || e.target.closest('.action-bar')) {
+    e.preventDefault();
+  }
+}, { passive: false });
+
+/* ==========================================================
+   INIT
+   ========================================================== */
+newGame();
+</script>
+</body>
+</html>
