@@ -1,999 +1,835 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <title>颜料混合实验室</title>
-    <style>
-      body {
-        margin: 0;
-        padding: 20px;
-        background: linear-gradient(145deg, #1e3c72, #2a5298);
-        font-family: "Segoe UI", Arial, sans-serif;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        color: #fff;
-      }
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<title>小小调色师 - 儿童颜色混合游戏</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>" />
+<!-- React + ReactDOM UMD -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Babel standalone for JSX -->
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-      .header {
-        text-align: center;
-        margin-bottom: 30px;
-        max-width: 800px;
-      }
+<style>
+/* ===== 全局样式 ===== */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
 
-      .header h1 {
-        font-size: 2.5rem;
-        margin-bottom: 10px;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-      }
+* { box-sizing: border-box; }
 
-      .header p {
-        font-size: 1.1rem;
-        line-height: 1.6;
-        color: #e0e0e0;
-      }
+:root {
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #333;
+  background-color: #FFF8E7;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-      .main-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 40px;
-        max-width: 900px;
-      }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #FFF8E7 0%, #FFE8D6 50%, #FFF0F5 100%);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
 
-      .mixing-area {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 25px;
-        background: rgba(0, 0, 0, 0.25);
-        border-radius: 20px;
-        padding: 30px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-        width: 100%;
-        max-width: 600px;
-      }
+/* ===== Tailwind 自定义配置 ===== */
+</style>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'sans-serif'],
+      },
+    },
+  },
+}
+</script>
 
-      .big-circle-container {
-        position: relative;
-        width: 280px;
-        height: 280px;
-      }
+<style>
+/* ===== 自定义 CSS 动画和效果 ===== */
 
-      .big-circle {
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        background-color: #ffffff;
-        border: 4px solid #4a4a4a;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.4s ease;
-        position: relative;
-        overflow: visible;
-      }
+/* 颜料球悬停弹跳效果 */
+.paint-ball {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  cursor: grab;
+}
+.paint-ball:hover {
+  transform: scale(1.15) translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+.paint-ball:active {
+  cursor: grabbing;
+  transform: scale(0.95);
+}
+.paint-ball.dragging {
+  opacity: 0.4;
+  transform: scale(0.9);
+}
 
-      .result-display {
-        position: absolute;
-        top: -50px;
-        left: 50%;
-        transform: translateX(-50%) translateY(-100%);
-        background: rgba(0, 0, 0, 0.85);
-        color: white;
-        padding: 12px 25px;
-        border-radius: 50px;
-        font-weight: bold;
-        font-size: 18px;
-        min-width: 220px;
-        text-align: center;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-        z-index: 20;
-        transition: all 0.3s ease;
-      }
+/* 调色盘水滴动画 */
+@keyframes dropIn {
+  0%   { transform: translateY(-40px) scale(0.3); opacity: 0; }
+  50%  { transform: translateY(5px) scale(1.15); opacity: 1; }
+  70%  { transform: translateY(-3px) scale(0.9); }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+.drip-animation {
+  animation: dropIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
 
-      .small-circles-container {
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 15px;
-        margin-bottom: 10px;
-      }
+/* 调色盘涟漪效果 */
+@keyframes ripple {
+  0%   { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(2); opacity: 0; }
+}
+.ripple-effect::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
+  animation: ripple 1s ease-out;
+}
 
-      .small-circle {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        cursor: grab;
-        touch-action: none;
-        transition: all 0.3s ease;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5),
-          inset 0 0 12px rgba(255, 255, 255, 0.2);
-        position: relative;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: bold;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
-        border: 3px solid rgba(255, 255, 255, 0.2);
-      }
+/* 知识卡片滑入 */
+@keyframes slideInRight {
+  0%   { transform: translateX(30px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+.knowledge-slide-in {
+  animation: slideInRight 0.5s ease-out forwards;
+}
 
-      .small-circle.red {
-        background: linear-gradient(145deg, #ff5252, #b33939);
-      }
+/* 操作按钮悬停 */
+.action-btn {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.action-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+}
+.action-btn:active {
+  transform: translateY(0) scale(0.95);
+}
 
-      .small-circle.orange {
-        background: linear-gradient(145deg, #ff9800, #e65100);
-      }
+/* 颜色过渡 */
+.color-transition {
+  transition: background-color 0.6s ease, box-shadow 0.6s ease;
+}
 
-      .small-circle.yellow {
-        background: linear-gradient(145deg, #ffeb3b, #f9a825);
-      }
+/* 收藏心形跳动 */
+@keyframes heartBeat {
+  0%  { transform: scale(1); }
+  15% { transform: scale(1.3); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.15); }
+  60% { transform: scale(1); }
+}
+.heart-beat {
+  animation: heartBeat 1s ease-in-out;
+}
 
-      .small-circle.green {
-        background: linear-gradient(145deg, #4caf50, #388e3c);
-      }
+/* 拖拽预览 */
+.drag-preview {
+  position: fixed;
+  top: -1000px;
+  left: -1000px;
+  pointer-events: none;
+  z-index: 9999;
+}
 
-      .small-circle.cyan {
-        background: linear-gradient(145deg, #00e5ff, #00838f);
-      }
+/* 调色盘放置区高亮 */
+.drop-zone-active {
+  border-color: rgba(255, 200, 100, 0.8) !important;
+  box-shadow: 0 0 0 4px rgba(255, 200, 100, 0.4), 0 8px 30px rgba(0,0,0,0.15) !important;
+  transform: scale(1.03);
+}
 
-      .small-circle.blue {
-        background: linear-gradient(145deg, #42a5f5, #2c81ba);
-      }
+.drop-zone-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10;
+}
+.drop-zone-hint span {
+  font-size: 2rem;
+  animation: bounce 0.6s infinite alternate;
+}
+@keyframes bounce {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-8px); }
+}
 
-      .small-circle.violet {
-        background: linear-gradient(145deg, #ab47bc, #6a1b9a);
-      }
+/* 移动端颜料盒横向滚动 */
+.palette-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+}
+.palette-scroll::-webkit-scrollbar { display: none; }
+.palette-scroll > * { scroll-snap-align: center; }
 
-      .color-selectors {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 20px;
-        width: 100%;
-        margin-top: 20px;
-      }
+/* 移动端颜料球尺寸 */
+@media (max-width: 767px) {
+  .paint-ball { width: 64px !important; height: 64px !important; font-size: 1.25rem !important; }
+  .mixing-board-mobile { width: 220px !important; height: 170px !important; }
+}
 
-      .color-selector {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-      }
+/* 滚动条美化 */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: rgba(255, 248, 231, 0.5); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: rgba(200, 170, 120, 0.4); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(200, 170, 120, 0.6); }
 
-      .color-selector label {
-        font-weight: bold;
-        font-size: 16px;
-        color: #e0e0e0;
-      }
+/* 淡入动画 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
 
-      .color-picker-area {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
+<script type="text/babel">
 
-      .color-preview {
-        width: 45px;
-        height: 45px;
-        border-radius: 10px;
-        border: 3px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
-        cursor: grab;
-        touch-action: none;
-        transition: all 0.3s ease;
-      }
+// ============================================================
+// 工具函数：颜色混合算法 (colorMixer.ts → JS)
+// ============================================================
 
-      .color-input {
-        width: 55px;
-        height: 40px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
-      }
+const BASE_PAINTS = [
+  { id: 'red',    name: '红色', hex: '#FF0000', rgb: { r: 255, g: 0,   b: 0   }, emoji: '🔴' },
+  { id: 'yellow', name: '黄色', hex: '#FFFF00', rgb: { r: 255, g: 255, b: 0   }, emoji: '🟡' },
+  { id: 'blue',   name: '蓝色', hex: '#0000FF', rgb: { r: 0,   g: 0,   b: 255 }, emoji: '🔵' },
+  { id: 'white',  name: '白色', hex: '#FFFFFF', rgb: { r: 255, g: 255, b: 255 }, emoji: '⚪' },
+  { id: 'black',  name: '黑色', hex: '#000000', rgb: { r: 0,   g: 0,   b: 0   }, emoji: '⚫' },
+];
 
-      .actions {
-        display: flex;
-        gap: 15px;
-        margin-top: 15px;
-      }
+function rgbToCmyk(rgb) {
+  const r = rgb.r / 255;
+  const g = rgb.g / 255;
+  const b = rgb.b / 255;
+  const k = 1 - Math.max(r, g, b);
+  if (k >= 1) return { c: 0, m: 0, y: 0, k: 1 };
+  return {
+    c: Math.round(((1 - r - k) / (1 - k)) * 1000) / 1000,
+    m: Math.round(((1 - g - k) / (1 - k)) * 1000) / 1000,
+    y: Math.round(((1 - b - k) / (1 - k)) * 1000) / 1000,
+    k: Math.round(k * 1000) / 1000,
+  };
+}
 
-      .action-btn {
-        padding: 10px 20px;
-        background: linear-gradient(145deg, #4a00e0, #6a11cb);
-        color: white;
-        border: none;
-        border-radius: 50px;
-        cursor: pointer;
-        font-weight: bold;
-        transition: all 0.3s;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-      }
+function cmykToRgb(cmyk) {
+  const r = 255 * (1 - cmyk.c) * (1 - cmyk.k);
+  const g = 255 * (1 - cmyk.m) * (1 - cmyk.k);
+  const b = 255 * (1 - cmyk.y) * (1 - cmyk.k);
+  return {
+    r: Math.round(Math.max(0, Math.min(255, r))),
+    g: Math.round(Math.max(0, Math.min(255, g))),
+    b: Math.round(Math.max(0, Math.min(255, b))),
+  };
+}
 
-      .action-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 7px 15px rgba(0, 0, 0, 0.4);
-      }
+function mixCmyk(base, added, baseWeight = 2, addedWeight = 1) {
+  const tw = baseWeight + addedWeight;
+  return {
+    c: Math.round(((base.c * baseWeight + added.c * addedWeight) / tw) * 1000) / 1000,
+    m: Math.round(((base.m * baseWeight + added.m * addedWeight) / tw) * 1000) / 1000,
+    y: Math.round(((base.y * baseWeight + added.y * addedWeight) / tw) * 1000) / 1000,
+    k: Math.round(((base.k * baseWeight + added.k * addedWeight) / tw) * 1000) / 1000,
+  };
+}
 
-      .reset-btn {
-        background: linear-gradient(145deg, #ff416c, #ff4b2b);
-        margin-top: 15px;
-        padding: 12px 30px;
-        font-size: 16px;
-      }
+function rgbToHex(rgb) {
+  const toHex = (n) => Math.max(0, Math.min(255, n)).toString(16).padStart(2, '0');
+  return `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`.toUpperCase();
+}
 
-      .instructions {
-        background: rgba(0, 0, 0, 0.35);
-        border-radius: 15px;
-        padding: 25px;
-        margin-top: 20px;
-        max-width: 600px;
-        line-height: 1.7;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-      }
+function hexToRgb(hex) {
+  const c = hex.replace('#', '');
+  return {
+    r: parseInt(c.substring(0, 2), 16),
+    g: parseInt(c.substring(2, 4), 16),
+    b: parseInt(c.substring(4, 6), 16),
+  };
+}
 
-      .instructions h3 {
-        color: #ffffff;
-        margin-top: 0;
-        margin-bottom: 15px;
-        border-bottom: 1px solid #4a4a4a;
-        padding-bottom: 10px;
-      }
+function colorDistance(a, b) {
+  const dr = a.r - b.r, dg = a.g - b.g, db = a.b - b.b;
+  return Math.sqrt(dr * dr + dg * dg + db * db) / 441.67;
+}
 
-      .formula-row {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 8px;
-        padding-bottom: 8px;
-        border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
-      }
+function rgbToHsl(rgb) {
+  const r = rgb.r / 255, g = rgb.g / 255, b = rgb.b / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), diff = max - min;
+  let h = 0;
+  const l = (max + min) / 2;
+  if (diff !== 0) {
+    if (max === r) h = 60 * (((g - b) / diff) % 6);
+    else if (max === g) h = 60 * ((b - r) / diff + 2);
+    else h = 60 * ((r - g) / diff + 4);
+  }
+  if (h < 0) h += 360;
+  const s = diff === 0 ? 0 : diff / (1 - Math.abs(2 * l - 1));
+  return { h: Math.round(h), s: Math.round(s * 100), l: Math.round(l * 100) };
+}
 
-      .formula-row:last-child {
-        border-bottom: none;
-      }
+function getColorName(rgb) {
+  const { h, s, l } = rgbToHsl(rgb);
+  if (l >= 95) return '白色';
+  if (l <= 5) return '黑色';
+  if (s <= 10) {
+    if (l >= 70) return '浅灰色';
+    if (l >= 40) return '灰色';
+    return '深灰色';
+  }
+  if (h < 15 || h >= 345)  { if (l >= 75) return '粉红色'; if (l >= 50) return '红色'; if (l >= 25) return '深红色'; return '暗红色'; }
+  if (h < 40)              { if (l >= 75) return '浅橙色'; if (l >= 50) return '橙色'; return '深橙色'; }
+  if (h < 65)              { if (l >= 80) return '淡黄色'; if (l >= 55) return '黄色'; return '暗黄色'; }
+  if (h < 80)              { if (l >= 65) return '黄绿色'; if (l >= 40) return '绿色'; return '深绿色'; }
+  if (h < 160)             { if (l >= 65) return '浅绿色'; if (l >= 40) return '绿色'; return '深绿色'; }
+  if (h < 200)             { if (l >= 70) return '天蓝色'; if (l >= 45) return '青色'; return '深青色'; }
+  if (h < 260)             { if (l >= 70) return '浅蓝色'; if (l >= 45) return '蓝色'; return '深蓝色'; }
+  if (h < 290)             { if (l >= 70) return '淡紫色'; if (l >= 45) return '紫色'; return '深紫色'; }
+  if (h < 345)             { if (l >= 70) return '粉紫色'; if (l >= 45) return '品红色'; return '深品红色'; }
+  return '未知色';
+}
 
-      .color-info {
-        margin-top: 15px;
-        text-align: center;
-        font-size: 14px;
-        color: #cccccc;
-      }
+function buildRecipe(paints) {
+  if (paints.length === 0) return '还未添加任何颜料';
+  if (paints.length === 1) return `纯${paints[0].name}`;
+  const counts = {};
+  for (const p of paints) {
+    if (counts[p.id]) counts[p.id].count++;
+    else counts[p.id] = { name: p.name, count: 1 };
+  }
+  return Object.values(counts).map(c => c.count > 1 ? `${c.name}×${c.count}` : c.name).join(' + ');
+}
 
-      .drag-indicator {
-        position: absolute;
-        bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 12px;
-        color: rgba(255, 255, 255, 0.7);
-        background: rgba(0, 0, 0, 0.5);
-        padding: 2px 10px;
-        border-radius: 15px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="header">
-      <h1>颜料混合实验室</h1>
-      <p>
-        基于 HSL 色相环混合原理构建，模拟真实颜料调色效果。拖拽颜色球或自定义颜色到中央区域，观察实时混合效果。
+function calculateMixResult(drops) {
+  if (drops.length === 0) {
+    return {
+      hex: '#FFFFFF', rgb: { r: 255, g: 255, b: 255 },
+      name: '白色', recipe: '还未添加任何颜料',
+    };
+  }
+  let currentCmyk = rgbToCmyk(drops[0].color.rgb);
+  for (let i = 1; i < drops.length; i++) {
+    currentCmyk = mixCmyk(currentCmyk, rgbToCmyk(drops[i].color.rgb), Math.min(i + 1, 3), 1);
+  }
+  const mixedRgb = cmykToRgb(currentCmyk);
+  return {
+    hex: rgbToHex(mixedRgb),
+    rgb: mixedRgb,
+    name: getColorName(mixedRgb),
+    recipe: buildRecipe(drops.map(d => d.color)),
+  };
+}
+
+
+// ============================================================
+// 颜色知识数据库 (colorKnowledge.ts → JS)
+// ============================================================
+
+const COLOR_KNOWLEDGE_DB = [
+  { hex:'#FF0000', name:'红色',   category:'原色', description:'红色是最温暖、最有力量的颜色，它像火焰一样充满活力！',              recipe:'红色是颜料的三原色之一，无法用其他颜色混合出来',        funFact:'🔴 草莓、消防车和玫瑰都是红色的哦！红色让人感到温暖和热情。' },
+  { hex:'#FFFF00', name:'黄色',   category:'原色', description:'黄色是最明亮、最快乐的颜色，它像阳光一样温暖！',                  recipe:'黄色是颜料的三原色之一，无法用其他颜色混合出来',        funFact:'🟡 向日葵、小鸭子和香蕉都是黄色的！黄色让人感到开心和活力。' },
+  { hex:'#0000FF', name:'蓝色',   category:'原色', description:'蓝色是最冷静、最安静的颜色，它像大海和天空一样宽广！',            recipe:'蓝色是颜料的三原色之一，无法用其他颜色混合出来',        funFact:'🔵 大海、蓝天和蓝莓都是蓝色的！蓝色让人感到平静和安心。' },
+  { hex:'#FF8C00', name:'橙色',   category:'间色', description:'橙色是红色和黄色混合而成的间色，温暖又活泼！',                    recipe:'红色 + 黄色 = 橙色',                                 funFact:'🟠 橙子、胡萝卜和秋天的树叶都是橙色的！橙色让人感到温暖和欢乐。' },
+  { hex:'#008000', name:'绿色',   category:'间色', description:'绿色是黄色和蓝色混合而成的间色，是自然和生命的颜色！',            recipe:'黄色 + 蓝色 = 绿色',                                 funFact:'🟢 小草、树叶和青蛙都是绿色的！绿色是大自然最常见的颜色。' },
+  { hex:'#800080', name:'紫色',   category:'间色', description:'紫色是红色和蓝色混合而成的间色，神秘又优雅！',                    recipe:'红色 + 蓝色 = 紫色',                                 funFact:'🟣 茄子、薰衣草和葡萄都是紫色的！紫色让人感到神秘和奇妙。' },
+  { hex:'#8B4513', name:'棕色',   category:'复色', description:'棕色是红色、黄色和蓝色混合而成的复色，像大地一样稳重！',          recipe:'红色 + 黄色 + 蓝色 = 棕色',                          funFact:'🟤 巧克力、树干和小熊都是棕色的！棕色是大地的颜色。' },
+  { hex:'#FFB6C1', name:'粉红色', category:'间色', description:'粉红色是红色和白色混合而成的颜色，温柔又可爱！',                  recipe:'红色 + 白色 = 粉红色',                                funFact:'🌸 樱花、桃子和火烈鸟都是粉红色的！粉红色让人感到温柔和甜蜜。' },
+  { hex:'#87CEEB', name:'天蓝色', category:'间色', description:'天蓝色是蓝色和白色混合而成的颜色，像晴朗的天空！',                recipe:'蓝色 + 白色 = 天蓝色',                                funFact:'🌤️ 晴天的天空、游泳池的水和蓝鸟都是天蓝色的！天蓝色让人感到自由和开阔。' },
+  { hex:'#FFFACD', name:'淡黄色', category:'间色', description:'淡黄色是黄色和白色混合而成的颜色，柔和又温暖！',                  recipe:'黄色 + 白色 = 淡黄色',                                funFact:'💛 奶油、小鸡和柠檬糖都是淡黄色的！淡黄色让人感到温馨和甜蜜。' },
+  { hex:'#FFFFFF', name:'白色',   category:'原色', description:'白色是最纯净的颜色，像冬天的雪一样洁白！',                        recipe:'白色是基础色之一，代表没有添加任何颜料',                funFact:'⬜ 雪花、棉花糖和白云都是白色的！白色让人感到干净和清新。' },
+  { hex:'#000000', name:'黑色',   category:'原色', description:'黑色是最深的颜色，把所有颜色加在一起就会变黑！',                  recipe:'黑色是基础色之一，加到任何颜色里都会让它变深',          funFact:'⬛ 夜晚的天空、煤炭和熊猫的眼圈都是黑色的！黑色让其他颜色更加鲜明。' },
+  { hex:'#808080', name:'灰色',   category:'复色', description:'灰色是黑色和白色混合而成的颜色，安静又沉稳！',                    recipe:'黑色 + 白色 = 灰色',                                 funFact:'🐘 大象、石头和阴天的云都是灰色的！灰色让人感到安静和平和。' },
+  { hex:'#FF6347', name:'番茄红', category:'复色', description:'番茄红是偏橙的红色，像成熟的番茄一样鲜艳！',                      recipe:'多一点红色 + 少一点橙色 = 番茄红',                    funFact:'🍅 番茄、西瓜瓤和红灯笼都是番茄红色的！这是一种让人食欲大增的颜色。' },
+  { hex:'#228B22', name:'森林绿', category:'复色', description:'森林绿是偏深的绿色，像茂密的森林一样深邃！',                      recipe:'绿色 + 一点点蓝色 = 森林绿',                          funFact:'🌲 松树叶、仙人掌和森林都是森林绿色的！这是大自然的保护色。' },
+  { hex:'#4169E1', name:'宝蓝色', category:'复色', description:'宝蓝色是偏亮的深蓝色，像珍贵的蓝宝石！',                          recipe:'蓝色 + 一点点红色 = 宝蓝色',                          funFact:'💎 蓝宝石、深海和夜晚的星空都有宝蓝色！这是智慧和高贵的象征。' },
+  { hex:'#DDA0DD', name:'淡紫色', category:'复色', description:'淡紫色是紫色和白色混合的颜色，梦幻又浪漫！',                      recipe:'紫色 + 白色 = 淡紫色',                                funFact:'💐 薰衣草花田、晚霞和独角兽都是淡紫色的！这是梦幻和童话的颜色。' },
+  { hex:'#F0E68C', name:'卡其色', category:'复色', description:'卡其色是偏暗的黄色，像沙漠和大地一样质朴！',                      recipe:'黄色 + 一点点棕色 = 卡其色',                          funFact:'🏜️ 沙漠、骆驼和面包都是卡其色的！这是一种让人感到温暖和踏实的颜色。' },
+];
+
+function findColorKnowledge(targetHex) {
+  const targetRgb = hexToRgb(targetHex);
+  let best = COLOR_KNOWLEDGE_DB[0], bestDist = Infinity;
+  for (const k of COLOR_KNOWLEDGE_DB) {
+    const dist = colorDistance(targetRgb, hexToRgb(k.hex));
+    if (dist < bestDist) { bestDist = dist; best = k; }
+  }
+  return best;
+}
+
+function generateKnowledge(targetHex, recipe, paintNames) {
+  const closest = findColorKnowledge(targetHex);
+  const dist = colorDistance(hexToRgb(targetHex), hexToRgb(closest.hex));
+  if (dist < 0.08) return closest;
+  const category = paintNames.length > 2 ? '复色' : '间色';
+  return {
+    hex: targetHex, name: closest.name, category,
+    description: `这是由${paintNames.join('、')}混合而成的${closest.name}，颜色非常特别！`,
+    recipe,
+    funFact: '🎨 你创造了一种独特的颜色！试试调整颜料的比例，看看会发生什么变化？',
+  };
+}
+
+
+// ============================================================
+// 组件定义
+// ============================================================
+
+const { useState, useEffect, useCallback, useRef } = React;
+
+// ---- PaintPalette（颜料选择区） ----
+function PaintPalette({ drops, onAddPaint }) {
+  const dragImageRef = useRef(null);
+
+  const handleDragStart = useCallback((e, paint) => {
+    e.dataTransfer.setData('application/paint-color', JSON.stringify(paint));
+    e.dataTransfer.effectAllowed = 'copy';
+    if (dragImageRef.current) {
+      dragImageRef.current.style.backgroundColor = paint.hex;
+      dragImageRef.current.style.display = 'block';
+      e.dataTransfer.setDragImage(dragImageRef.current, 25, 25);
+      requestAnimationFrame(() => {
+        if (dragImageRef.current) dragImageRef.current.style.display = 'none';
+      });
+    }
+    e.currentTarget.classList.add('dragging');
+  }, []);
+
+  const handleDragEnd = useCallback((e) => {
+    e.currentTarget.classList.remove('dragging');
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center gap-2 lg:gap-4 p-2 lg:p-4">
+      <h2 className="text-base lg:text-xl font-bold text-amber-800 tracking-wide mb-1 lg:mb-2">🎨 颜料盒</h2>
+      <div className="palette-scroll flex lg:flex-col items-center gap-3 lg:gap-5 pb-1 lg:pb-0 w-full lg:w-auto">
+        {BASE_PAINTS.map(paint => {
+          const count = drops.filter(d => d.color.id === paint.id).length;
+          return (
+            <div key={paint.id} className="flex flex-col items-center gap-1 flex-shrink-0">
+              <button
+                onClick={() => onAddPaint(paint)}
+                draggable
+                onDragStart={e => handleDragStart(e, paint)}
+                onDragEnd={handleDragEnd}
+                className="paint-ball group relative w-16 h-16 lg:w-[80px] lg:h-[80px] rounded-full flex items-center justify-center font-bold shadow-lg border-4 border-white/60 hover:border-white/90 focus:outline-none focus:ring-4 focus:ring-amber-300 active:scale-95"
+                style={{
+                  backgroundColor: paint.hex,
+                  color: paint.id === 'white' ? '#666' : paint.id === 'yellow' ? '#333' : '#FFF',
+                  textShadow: paint.id === 'yellow' ? '0 1px 2px rgba(0,0,0,0.1)' : '0 1px 3px rgba(0,0,0,0.3)',
+                }}
+                title={`拖拽或点击添加${paint.name}`}
+                aria-label={`拖拽${paint.name}到调色盘`}
+              >
+                <div className="absolute top-1.5 left-2 w-4 h-2 lg:w-5 lg:h-3 rounded-full opacity-60"
+                  style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.8), transparent)' }} />
+                <span className="relative z-10 text-base lg:text-lg">{paint.emoji}</span>
+                {count > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs font-bold w-5 h-5 lg:w-6 lg:h-6 rounded-full flex items-center justify-center shadow-md">
+                    {count}
+                  </span>
+                )}
+              </button>
+              <span className="text-xs lg:text-sm font-medium text-amber-900">{paint.name}</span>
+            </div>
+          );
+        })}
+      </div>
+      <p className="text-xs text-amber-600/70 mt-2 lg:mt-4 text-center leading-relaxed px-2 hidden lg:block">
+        拖拽或点击颜料球，<br />把颜料加到调色盘里吧！
       </p>
+      <p className="text-xs text-amber-600/70 mt-1 text-center lg:hidden">
+        ← 滑动选择颜料，拖到调色盘 →
+      </p>
+      <div ref={dragImageRef} aria-hidden="true"
+        className="drag-preview w-[50px] h-[50px] rounded-full border-3 border-white/60 shadow-xl"
+        style={{ display: 'none' }} />
     </div>
+  );
+}
 
-    <div class="main-container">
-      <div class="mixing-area">
-        <div class="big-circle-container">
-          <div class="big-circle" id="bigCircle">
-            <div class="result-display" id="resultDisplay">
-              RGB(255,255,255) #FFFFFF
+// ---- MixingBoard（调色盘） ----
+function MixingBoard({ drops, mixResult, onDropPaint }) {
+  const [animatingDrop, setAnimatingDrop] = useState(null);
+  const [showRipple, setShowRipple] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  useEffect(() => {
+    if (drops.length > 0) {
+      const latest = drops[drops.length - 1];
+      setAnimatingDrop(latest.key);
+      setShowRipple(true);
+      const t = setTimeout(() => { setAnimatingDrop(null); setShowRipple(false); }, 800);
+      return () => clearTimeout(t);
+    }
+  }, [drops.length]);
+
+  const handleDragOver = useCallback(e => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    if (!isDragOver) setIsDragOver(true);
+  }, [isDragOver]);
+
+  const handleDragLeave = useCallback(e => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) {
+      setIsDragOver(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback(e => {
+    e.preventDefault();
+    setIsDragOver(false);
+    try {
+      const data = e.dataTransfer.getData('application/paint-color');
+      if (data) onDropPaint(JSON.parse(data));
+    } catch (_) {}
+  }, [onDropPaint]);
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-4 lg:gap-6 p-4 lg:p-6">
+      <h2 className="text-xl lg:text-2xl font-bold text-amber-800 tracking-wide">🧪 调色盘</h2>
+      <div className="relative">
+        <div className="absolute -inset-3 lg:-inset-4 rounded-[50%] opacity-30"
+          style={{ background: 'conic-gradient(from 0deg, #FFE4E1, #FFFACD, #E0F0FF, #DDA0DD, #FFE4E1)' }} />
+        <div onDragOver={handleDragOver} onDragEnter={() => setIsDragOver(true)}
+          onDragLeave={handleDragLeave} onDrop={handleDrop}
+          className={`relative w-[220px] h-[170px] lg:w-[320px] lg:h-[240px] rounded-[50%] shadow-2xl border-8 border-white/40 color-transition overflow-hidden mixing-board-mobile ${showRipple ? 'ripple-effect' : ''} ${isDragOver ? 'drop-zone-active' : ''}`}
+          style={{
+            background: drops.length === 0
+              ? 'linear-gradient(145deg, #FAFAFA 0%, #F0F0F0 50%, #E8E8E8 100%)'
+              : mixResult.hex,
+          }}>
+          <div className="absolute inset-0 opacity-10"
+            style={{ background: 'radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.5), transparent 60%)' }} />
+          {isDragOver && (
+            <div className="drop-zone-hint"><span>🤲</span></div>
+          )}
+          {animatingDrop && !isDragOver && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="drip-animation">
+                <div className="w-6 h-8 lg:w-8 lg:h-10 rounded-full opacity-80"
+                  style={{
+                    backgroundColor: drops[drops.length - 1]?.color.hex,
+                    boxShadow: `0 2px 10px ${drops[drops.length - 1]?.color.hex}80`,
+                  }} />
+              </div>
             </div>
-            <div class="drag-indicator">拖拽颜色到此处</div>
-          </div>
-        </div>
-
-        <div class="small-circles-container">
-          <div
-            class="small-circle red"
-            draggable="true"
-            data-color="red"
-            data-r="255"
-            data-g="0"
-            data-b="0"
-          >
-            <span>红</span>
-          </div>
-          <div
-            class="small-circle orange"
-            draggable="true"
-            data-color="orange"
-            data-r="255"
-            data-g="127"
-            data-b="0"
-          >
-            <span>橙</span>
-          </div>
-          <div
-            class="small-circle yellow"
-            draggable="true"
-            data-color="yellow"
-            data-r="255"
-            data-g="255"
-            data-b="0"
-          >
-            <span>黄</span>
-          </div>
-          <div
-            class="small-circle green"
-            draggable="true"
-            data-color="green"
-            data-r="0"
-            data-g="255"
-            data-b="0"
-          >
-            <span>绿</span>
-          </div>
-          <div
-            class="small-circle cyan"
-            draggable="true"
-            data-color="cyan"
-            data-r="0"
-            data-g="255"
-            data-b="255"
-          >
-            <span>青</span>
-          </div>
-          <div
-            class="small-circle blue"
-            draggable="true"
-            data-color="blue"
-            data-r="0"
-            data-g="0"
-            data-b="255"
-          >
-            <span>蓝</span>
-          </div>
-          <div
-            class="small-circle violet"
-            draggable="true"
-            data-color="violet"
-            data-r="139"
-            data-g="0"
-            data-b="255"
-          >
-            <span>紫</span>
-          </div>
-        </div>
-
-        <div class="color-selectors">
-          <div class="color-selector">
-            <label>自定义颜色1</label>
-            <div class="color-picker-area">
-              <input
-                type="color"
-                class="color-input"
-                id="color1"
-                value="#ff0000"
-              />
-              <div
-                class="color-preview"
-                id="colorPreview1"
-                draggable="true"
-                data-type="custom"
-              ></div>
+          )}
+          {drops.length === 0 && !isDragOver && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <p className="text-gray-400 text-sm lg:text-lg font-medium animate-pulse text-center px-6">
+                拖拽或点击颜料球开始调色 🎨
+              </p>
             </div>
-          </div>
-
-          <div class="color-selector">
-            <label>自定义颜色2</label>
-            <div class="color-picker-area">
-              <input
-                type="color"
-                class="color-input"
-                id="color2"
-                value="#00ff00"
-              />
-              <div
-                class="color-preview"
-                id="colorPreview2"
-                draggable="true"
-                data-type="custom"
-              ></div>
-            </div>
-          </div>
-
-          <div class="color-selector">
-            <label>自定义颜色3</label>
-            <div class="color-picker-area">
-              <input
-                type="color"
-                class="color-input"
-                id="color3"
-                value="#0000ff"
-              />
-              <div
-                class="color-preview"
-                id="colorPreview3"
-                draggable="true"
-                data-type="custom"
-              ></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button class="action-btn" onclick="addColor(1)">添加颜色1</button>
-          <button class="action-btn" onclick="addColor(2)">添加颜色2</button>
-          <button class="action-btn" onclick="addColor(3)">添加颜色3</button>
-          <button class="action-btn reset-btn" onclick="resetColors()">
-            重置所有
-          </button>
+          )}
         </div>
       </div>
+      {drops.length > 0 && (
+        <div className="flex flex-wrap items-center justify-center gap-1.5 lg:gap-2 max-w-[280px] lg:max-w-[340px]">
+          <span className="text-xs lg:text-sm text-amber-700 font-medium mr-1">已添加：</span>
+          {drops.map((drop, i) => (
+            <div key={drop.key} className="drip-animation" style={{ animationDelay: `${i * 0.05}s` }}>
+              <div className="w-5 h-5 lg:w-7 lg:h-7 rounded-full border-2 border-white shadow-md hover:scale-125 transition-transform cursor-default"
+                style={{ backgroundColor: drop.color.hex }} title={drop.color.name} />
+            </div>
+          ))}
+        </div>
+      )}
+      {drops.length > 0 && (
+        <div className="bg-white/60 backdrop-blur-sm rounded-xl lg:rounded-2xl px-3 py-2 lg:px-5 lg:py-3 shadow-md">
+          <p className="text-amber-800 text-xs lg:text-sm font-medium">配方：{mixResult.recipe}</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
-      <div class="instructions">
-        <h3>混合原理说明（HSL 色相环颜料混合）</h3>
-        <div class="formula-row">
-          <span>🔴 红 + 🟡 黄</span>
-          <span>→ 🟠 橙色</span>
-        </div>
-        <div class="formula-row">
-          <span>🟡 黄 + 🔵 蓝</span>
-          <span>→ 🟢 绿色</span>
-        </div>
-        <div class="formula-row">
-          <span>🔴 红 + 🔵 蓝</span>
-          <span>→ 🟣 紫色</span>
-        </div>
-        <div class="formula-row">
-          <span>🟠 橙 + 🟢 绿</span>
-          <span>→ 🟡 黄色</span>
-        </div>
-        <div class="formula-row">
-          <span>⚪ 白 + 任何颜色</span>
-          <span>→ 该颜色本身</span>
-        </div>
-
-        <div class="color-info">
-          <p>💡 原理：在色相环上取两色中间色相，色相距离越远混合结果越浑浊</p>
-          <p>💡 提示：拖拽颜色球或自定义颜色到中央区域进行混合</p>
-          <p>💡 效果：模拟真实颜料调色，红+黄=橙、黄+蓝=绿、红+蓝=紫</p>
+// ---- ColorResult（调色结果） ----
+function ColorResult({ mixResult, hasPaints }) {
+  return (
+    <div className="flex flex-col items-center gap-3 lg:gap-4 p-4 lg:p-5 animate-fade-in">
+      <h2 className="text-base lg:text-lg font-bold text-amber-800">🎯 调色结果</h2>
+      <div className="relative">
+        <div className="w-[100px] h-[100px] lg:w-[140px] lg:h-[140px] rounded-2xl lg:rounded-3xl shadow-xl color-transition border-4 border-white/50 flex items-center justify-center"
+          style={{
+            backgroundColor: hasPaints ? mixResult.hex : '#F5F5F5',
+            boxShadow: hasPaints
+              ? `0 8px 30px ${mixResult.hex}60, 0 0 0 4px rgba(255,255,255,0.3)`
+              : '0 8px 30px rgba(0,0,0,0.1)',
+          }}>
+          <div className="absolute top-2 left-3 w-8 h-4 lg:w-12 lg:h-6 rounded-full opacity-40"
+            style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.8), transparent)' }} />
+          {!hasPaints && <span className="text-3xl lg:text-4xl text-gray-300">?</span>}
         </div>
       </div>
+      <div className="text-center">
+        <p className="text-xl lg:text-2xl font-black tracking-wider color-transition"
+          style={{ color: hasPaints ? mixResult.hex : '#CCC' }}>
+          {hasPaints ? mixResult.name : '等待调色...'}
+        </p>
+      </div>
+      {hasPaints && (
+        <>
+          <div className="bg-white/70 backdrop-blur-sm rounded-xl px-3 py-1.5 lg:px-4 lg:py-2 shadow-sm">
+            <p className="text-xs lg:text-sm font-mono text-gray-600 tracking-widest">{mixResult.hex}</p>
+          </div>
+          <div className="flex gap-2 lg:gap-3 text-xs text-gray-500">
+            <span>R: {mixResult.rgb.r}</span>
+            <span>G: {mixResult.rgb.g}</span>
+            <span>B: {mixResult.rgb.b}</span>
+          </div>
+        </>
+      )}
     </div>
-
-    <script>
-      // 颜色混合状态
-      let currentColor = { r: 255, g: 255, b: 255 }; // 默认白色
-      const bigCircle = document.getElementById("bigCircle");
-      const resultDisplay = document.getElementById("resultDisplay");
-      const colorPreviews = [
-        document.getElementById("colorPreview1"),
-        document.getElementById("colorPreview2"),
-        document.getElementById("colorPreview3"),
-      ];
-
-      // 初始化
-      init();
-
-      function init() {
-        // 初始化颜色选择器预览
-        initColorPreviews();
-
-        // 初始化拖拽事件
-        initDragEvents();
-
-        // 更新颜色显示
-        updateColorDisplay();
-      }
-
-      // 初始化颜色选择器预览
-      function initColorPreviews() {
-        colorPreviews.forEach((preview, index) => {
-          const colorInput = document.getElementById(`color${index + 1}`);
-          updatePreview(index);
-
-          colorInput.addEventListener("input", () => {
-            updatePreview(index);
-          });
-        });
-      }
-
-      // 更新颜色预览
-      function updatePreview(index) {
-        const colorInput = document.getElementById(`color${index + 1}`);
-        const preview = colorPreviews[index];
-
-        const color = hexToRgb(colorInput.value);
-        preview.style.backgroundColor = colorInput.value;
-
-        const rgb = color
-          ? `rgb(${color.r}, ${color.g}, ${color.b})`
-          : colorInput.value;
-
-        preview.style.border = `3px solid ${rgb}`;
-      }
-
-      // 初始化拖拽事件（桌面端 + 移动端）
-      function initDragEvents() {
-        const smallCircles = document.querySelectorAll(".small-circle");
-
-        // ========== 桌面端：HTML5 Drag & Drop ==========
-        smallCircles.forEach((circle) => {
-          circle.addEventListener("dragstart", (e) => {
-            const colorType = e.target.dataset.color;
-            const colorData = getColorValues(colorType);
-
-            e.dataTransfer.setData("color", JSON.stringify(colorData));
-            e.dataTransfer.setData("source", "preset");
-            e.dataTransfer.setData("colorType", colorType);
-
-            e.target.style.opacity = "0.7";
-            e.target.style.transform = "scale(0.95)";
-          });
-
-          circle.addEventListener("dragend", (e) => {
-            e.target.style.opacity = "1";
-            e.target.style.transform = "scale(1)";
-          });
-        });
-
-        colorPreviews.forEach((preview, index) => {
-          preview.addEventListener("dragstart", (e) => {
-            const colorInput = document.getElementById(`color${index + 1}`);
-            const color = hexToRgb(colorInput.value);
-
-            e.dataTransfer.setData("color", JSON.stringify(color));
-            e.dataTransfer.setData("source", "custom");
-            e.dataTransfer.setData("colorType", `custom${index}`);
-
-            e.target.style.opacity = "0.7";
-            e.target.style.transform = "scale(0.95)";
-          });
-
-          preview.addEventListener("dragend", (e) => {
-            e.target.style.opacity = "1";
-            e.target.style.transform = "scale(1)";
-          });
-        });
-
-        bigCircle.addEventListener("dragover", (e) => {
-          e.preventDefault();
-          showDropHighlight();
-        });
-
-        bigCircle.addEventListener("dragleave", () => {
-          hideDropHighlight();
-        });
-
-        bigCircle.addEventListener("drop", (e) => {
-          e.preventDefault();
-          hideDropHighlight();
-
-          const colorData = e.dataTransfer.getData("color");
-          const colorType = e.dataTransfer.getData("colorType");
-
-          if (colorData) {
-            const color = JSON.parse(colorData);
-            mixColors(color);
-            createMixingEffect(colorType);
-          }
-        });
-
-        // ========== 移动端：Touch 事件 ==========
-        let touchDragData = null; // 触摸拖拽时暂存的颜色数据
-        let touchClone = null; // 跟随手指的克隆元素
-        let touchSource = null; // 触摸拖拽的源元素
-
-        // 为小圆添加触摸事件
-        smallCircles.forEach((circle) => {
-          circle.addEventListener("touchstart", (e) => {
-            e.preventDefault();
-            const colorType = circle.dataset.color;
-            touchDragData = {
-              color: getColorValues(colorType),
-              colorType: colorType,
-            };
-            touchSource = circle;
-            circle.style.opacity = "0.7";
-            circle.style.transform = "scale(0.95)";
-            createTouchClone(e, circle);
-          }, { passive: false });
-        });
-
-        // 为自定义颜色预览添加触摸事件
-        colorPreviews.forEach((preview, index) => {
-          preview.addEventListener("touchstart", (e) => {
-            e.preventDefault();
-            const colorInput = document.getElementById(`color${index + 1}`);
-            const color = hexToRgb(colorInput.value);
-            touchDragData = {
-              color: color,
-              colorType: `custom${index + 1}`,
-            };
-            touchSource = preview;
-            preview.style.opacity = "0.7";
-            preview.style.transform = "scale(0.95)";
-            createTouchClone(e, preview);
-          }, { passive: false });
-        });
-
-        // 创建跟随手指的克隆元素
-        function createTouchClone(e, sourceEl) {
-          touchClone = sourceEl.cloneNode(true);
-          touchClone.style.position = "fixed";
-          touchClone.style.zIndex = "9999";
-          touchClone.style.pointerEvents = "none";
-          touchClone.style.opacity = "0.8";
-          touchClone.style.width = sourceEl.offsetWidth + "px";
-          touchClone.style.height = sourceEl.offsetHeight + "px";
-          touchClone.style.borderRadius = "50%";
-          touchClone.style.boxShadow = "0 8px 25px rgba(0,0,0,0.6)";
-          touchClone.style.transition = "none";
-
-          const touch = e.touches[0];
-          touchClone.style.left = touch.clientX - sourceEl.offsetWidth / 2 + "px";
-          touchClone.style.top = touch.clientY - sourceEl.offsetHeight / 2 + "px";
-
-          document.body.appendChild(touchClone);
-        }
-
-        // 全局 touchmove：移动克隆元素 + 检测是否在大圆上方
-        document.addEventListener("touchmove", (e) => {
-          if (!touchDragData || !touchClone) return;
-          e.preventDefault();
-
-          const touch = e.touches[0];
-          touchClone.style.left = touch.clientX - touchClone.offsetWidth / 2 + "px";
-          touchClone.style.top = touch.clientY - touchClone.offsetHeight / 2 + "px";
-
-          // 检测手指是否在大圆上方
-          if (isTouchOverBigCircle(touch)) {
-            showDropHighlight();
-          } else {
-            hideDropHighlight();
-          }
-        }, { passive: false });
-
-        // 全局 touchend：检测是否释放在大圆上，执行混合
-        document.addEventListener("touchend", (e) => {
-          if (!touchDragData) return;
-
-          // 恢复源元素样式
-          if (touchSource) {
-            touchSource.style.opacity = "1";
-            touchSource.style.transform = "scale(1)";
-            touchSource = null;
-          }
-
-          // 移除克隆元素
-          if (touchClone) {
-            touchClone.remove();
-            touchClone = null;
-          }
-
-          hideDropHighlight();
-
-          // 检测释放位置是否在大圆内
-          const touch = e.changedTouches[0];
-          if (isTouchOverBigCircle(touch)) {
-            mixColors(touchDragData.color);
-            createMixingEffect(touchDragData.colorType);
-          }
-
-          touchDragData = null;
-        });
-
-        // 判断触摸点是否在大圆区域内
-        function isTouchOverBigCircle(touch) {
-          const rect = bigCircle.getBoundingClientRect();
-          const cx = rect.left + rect.width / 2;
-          const cy = rect.top + rect.height / 2;
-          const radius = rect.width / 2;
-          const dx = touch.clientX - cx;
-          const dy = touch.clientY - cy;
-          return dx * dx + dy * dy <= radius * radius;
-        }
-      }
-
-      // 大圆高亮（拖拽悬停时）
-      function showDropHighlight() {
-        bigCircle.style.transform = "scale(1.05)";
-        bigCircle.style.boxShadow =
-          "0 15px 35px rgba(0,0,0,0.8), inset 0 0 25px rgba(0,0,0,0.7)";
-        const indicator = bigCircle.querySelector(".drag-indicator");
-        indicator.style.opacity = "1";
-        indicator.style.transform = "translateX(-50%) translateY(-10px)";
-      }
-
-      // 大圆取消高亮
-      function hideDropHighlight() {
-        bigCircle.style.transform = "scale(1)";
-        bigCircle.style.boxShadow =
-          "0 8px 25px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.9)";
-        const indicator = bigCircle.querySelector(".drag-indicator");
-        indicator.style.opacity = "0.7";
-        indicator.style.transform = "translateX(-50%)";
-      }
-
-      // 获取预设颜色RGB值
-      function getColorValues(colorType) {
-        switch (colorType) {
-          case "red":
-            return { r: 255, g: 0, b: 0 };
-          case "orange":
-            return { r: 255, g: 127, b: 0 };
-          case "yellow":
-            return { r: 255, g: 255, b: 0 };
-          case "green":
-            return { r: 0, g: 255, b: 0 };
-          case "cyan":
-            return { r: 0, g: 255, b: 255 };
-          case "blue":
-            return { r: 0, g: 0, b: 255 };
-          case "violet":
-            return { r: 139, g: 0, b: 255 };
-          default:
-            return { r: 0, g: 0, b: 0 };
-        }
-      }
-
-      // 核心颜色混合算法 — HSL 色相环颜料混合
-      function mixColors(newColor) {
-        // 特殊处理：白色不参与混合
-        if (isWhite(newColor)) {
-          updateColorDisplay();
-          return;
-        }
-        if (isWhite(currentColor)) {
-          currentColor = { ...newColor };
-          updateColorDisplay();
-          return;
-        }
-
-        const hsl1 = rgbToHsl(currentColor.r, currentColor.g, currentColor.b);
-        const hsl2 = rgbToHsl(newColor.r, newColor.g, newColor.b);
-
-        let h, s, l;
-
-        if (hsl1.s < 0.01 && hsl2.s < 0.01) {
-          // 两色都是无彩色（黑/灰），直接平均亮度
-          h = 0;
-          s = 0;
-          l = (hsl1.l + hsl2.l) / 2;
-        } else if (hsl1.s < 0.01) {
-          // 当前无彩色，采用新颜色色相
-          h = hsl2.h;
-          s = hsl2.s / 2;
-          l = (hsl1.l + hsl2.l) / 2;
-        } else if (hsl2.s < 0.01) {
-          // 新颜色无彩色，保持当前色相
-          h = hsl1.h;
-          s = hsl1.s / 2;
-          l = (hsl1.l + hsl2.l) / 2;
-        } else {
-          // 两色都有彩色 — 色相环上取中间值
-          h = circularHueMean(hsl1.h, hsl2.h);
-
-          // 色相距离越远，混合结果越浑浊（饱和度降低、亮度降低）
-          let hueDiff = Math.abs(hsl2.h - hsl1.h);
-          if (hueDiff > 180) hueDiff = 360 - hueDiff;
-
-          const satFactor = 1 - (hueDiff / 180) * 0.4;
-          const lightFactor = 1 - (hueDiff / 180) * 0.15;
-
-          s = ((hsl1.s + hsl2.s) / 2) * satFactor;
-          l = ((hsl1.l + hsl2.l) / 2) * lightFactor;
-        }
-
-        const rgb = hslToRgb(h, s, l);
-        currentColor = { r: rgb.r, g: rgb.g, b: rgb.b };
-
-        updateColorDisplay();
-      }
-
-      // 判断是否为白色
-      function isWhite(color) {
-        return color.r === 255 && color.g === 255 && color.b === 255;
-      }
-
-      // ---- HSL 辅助函数 ----
-
-      // RGB 转 HSL
-      function rgbToHsl(r, g, b) {
-        r /= 255;
-        g /= 255;
-        b /= 255;
-        const max = Math.max(r, g, b);
-        const min = Math.min(r, g, b);
-        let h,
-          s,
-          l = (max + min) / 2;
-
-        if (max === min) {
-          h = s = 0;
-        } else {
-          const d = max - min;
-          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-          switch (max) {
-            case r:
-              h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
-              break;
-            case g:
-              h = ((b - r) / d + 2) / 6;
-              break;
-            case b:
-              h = ((r - g) / d + 4) / 6;
-              break;
-          }
-        }
-        return { h: h * 360, s, l };
-      }
-
-      // HSL 转 RGB
-      function hslToRgb(h, s, l) {
-        h /= 360;
-        let r, g, b;
-        if (s === 0) {
-          r = g = b = l;
-        } else {
-          const hue2rgb = (p, q, t) => {
-            if (t < 0) t += 1;
-            if (t > 1) t -= 1;
-            if (t < 1 / 6) return p + (q - p) * 6 * t;
-            if (t < 1 / 2) return q;
-            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-            return p;
-          };
-          const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-          const p = 2 * l - q;
-          r = hue2rgb(p, q, h + 1 / 3);
-          g = hue2rgb(p, q, h);
-          b = hue2rgb(p, q, h - 1 / 3);
-        }
-        return {
-          r: Math.round(r * 255),
-          g: Math.round(g * 255),
-          b: Math.round(b * 255),
-        };
-      }
-
-      // 色相环上取两个色相的中间值（沿较短弧）
-      function circularHueMean(h1, h2) {
-        let diff = h2 - h1;
-        if (diff > 180) diff -= 360;
-        if (diff < -180) diff += 360;
-        let mean = h1 + diff / 2;
-        if (mean < 0) mean += 360;
-        if (mean >= 360) mean -= 360;
-        return mean;
-      }
-
-      // 更新颜色显示
-      function updateColorDisplay() {
-        const rgb = `RGB(${currentColor.r}, ${currentColor.g}, ${currentColor.b})`;
-        const hex = rgbToHex(currentColor.r, currentColor.g, currentColor.b);
-        resultDisplay.textContent = `${rgb} ${hex}`;
-
-        // 更新背景色
-        bigCircle.style.backgroundColor = `rgb(${currentColor.r}, ${currentColor.g}, ${currentColor.b})`;
-
-        // 更新结果框背景色
-        resultDisplay.style.backgroundColor = `rgba(${currentColor.r}, ${currentColor.g}, ${currentColor.b}, 0.85)`;
-
-        // 特殊处理白色背景的文字颜色
-        if (
-          currentColor.r > 200 &&
-          currentColor.g > 200 &&
-          currentColor.b > 200
-        ) {
-          resultDisplay.style.color = "black";
-          resultDisplay.style.textShadow = "none";
-        } else {
-          resultDisplay.style.color = "white";
-          resultDisplay.style.textShadow = "0 1px 3px rgba(0,0,0,0.8)";
-        }
-      }
-
-      // 添加混合动画
-      function createMixingEffect(colorType) {
-        const effect = document.createElement("div");
-        effect.style.position = "absolute";
-        effect.style.width = "30px";
-        effect.style.height = "30px";
-        effect.style.borderRadius = "50%";
-        effect.style.top = "50%";
-        effect.style.left = "50%";
-        effect.style.transform = "translate(-50%, -50%) scale(0)";
-        effect.style.opacity = "0.7";
-        effect.style.zIndex = "5";
-        effect.style.pointerEvents = "none";
-
-        // 根据来源设置不同颜色
-        if (colorType.startsWith("custom")) {
-          const index = colorType.replace("custom", "");
-          const colorInput = document.getElementById(`color${index}`);
-          effect.style.backgroundColor = colorInput.value;
-        } else {
-          effect.style.backgroundColor = getColorValues(colorType)
-            ? `rgb(${getColorValues(colorType).r}, ${
-                getColorValues(colorType).g
-              }, ${getColorValues(colorType).b})`
-            : "white";
-        }
-
-        bigCircle.appendChild(effect);
-
-        // 粒子动画
-        setTimeout(() => {
-          effect.style.transform = "translate(-50%, -50%) scale(10)";
-          effect.style.opacity = "0";
-        }, 10);
-
-        // 移除粒子元素
-        setTimeout(() => {
-          effect.remove();
-        }, 600);
-      }
-
-      // 添加自定义颜色
-      function addColor(index) {
-        const colorInput = document.getElementById(`color${index}`);
-        const hexColor = colorInput.value;
-        const rgbColor = hexToRgb(hexColor);
-
-        if (!rgbColor) return;
-
-        // 复用核心混合算法
-        mixColors(rgbColor);
-
-        // 添加混合动画
-        createMixingEffect(`custom${index}`);
-      }
-
-      // 十六进制转RGB
-      function hexToRgb(hex) {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-
-        if (result) {
-          const r = parseInt(result[1], 16);
-          const g = parseInt(result[2], 16);
-          const b = parseInt(result[3], 16);
-
-          return { r, g, b };
-        }
-
-        return null;
-      }
-
-      // RGB转十六进制
-      function rgbToHex(r, g, b) {
-        return `#${componentToHex(r)}${componentToHex(g)}${componentToHex(b)}`;
-      }
-
-      function componentToHex(c) {
-        const hex = c.toString(16);
-        return hex.length == 1 ? "0" + hex : hex;
-      }
-
-      // 重置颜色
-      function resetColors() {
-        currentColor = { r: 255, g: 255, b: 255 }; // 重置为白色
-        updateColorDisplay();
-
-        // 重置颜色选择器为默认值
-        document.getElementById("color1").value = "#ff0000";
-        document.getElementById("color2").value = "#00ff00";
-        document.getElementById("color3").value = "#0000ff";
-
-        // 更新预览
-        initColorPreviews();
-      }
-    </script>
-  </body>
+  );
+}
+
+// ---- KnowledgeCard（颜色小知识） ----
+function KnowledgeCard({ mixHex, recipe, paintNames, hasPaints }) {
+  const [knowledge, setKnowledge] = useState(null);
+  const [animKey, setAnimKey] = useState(0);
+
+  useEffect(() => {
+    if (hasPaints) {
+      setKnowledge(generateKnowledge(mixHex, recipe, paintNames));
+      setAnimKey(p => p + 1);
+    } else {
+      setKnowledge(null);
+    }
+  }, [mixHex, recipe, paintNames, hasPaints]);
+
+  return (
+    <div className="flex flex-col gap-2 lg:gap-3 p-3 lg:p-4">
+      <h2 className="text-base lg:text-lg font-bold text-amber-800">📖 颜色小知识</h2>
+      {knowledge ? (
+        <div key={animKey}
+          className="knowledge-slide-in bg-white/70 backdrop-blur-sm rounded-2xl p-3 lg:p-4 shadow-md border-2 border-amber-100">
+          <div className="flex items-center gap-1.5 lg:gap-2 mb-2">
+            <span className="inline-block px-2 lg:px-3 py-0.5 lg:py-1 rounded-full text-xs font-bold text-white"
+              style={{ backgroundColor: knowledge.category === '原色' ? '#FF6B6B' : knowledge.category === '间色' ? '#4ECDC4' : '#A78BFA' }}>
+              {knowledge.category}
+            </span>
+            <span className="text-sm lg:text-base font-bold text-amber-900">{knowledge.name}</span>
+          </div>
+          <p className="text-xs lg:text-sm text-amber-800 leading-relaxed mb-2 lg:mb-3">{knowledge.description}</p>
+          <div className="bg-amber-50 rounded-xl px-2 lg:px-3 py-1.5 lg:py-2 mb-2 lg:mb-3">
+            <p className="text-xs text-amber-600 font-medium">🧪 配方</p>
+            <p className="text-xs lg:text-sm text-amber-800 font-bold">{knowledge.recipe}</p>
+          </div>
+          <div className="bg-rose-50 rounded-xl px-2 lg:px-3 py-1.5 lg:py-2">
+            <p className="text-xs text-rose-500 font-medium">✨ 小知识</p>
+            <p className="text-xs lg:text-sm text-rose-700 leading-relaxed">{knowledge.funFact}</p>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-white/50 backdrop-blur-sm rounded-2xl p-4 lg:p-6 shadow-sm border-2 border-dashed border-amber-200 text-center">
+          <p className="text-2xl lg:text-3xl mb-1 lg:mb-2">📚</p>
+          <p className="text-xs lg:text-sm text-amber-600/70">添加颜料后，<br />这里会显示有趣的颜色知识哦！</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---- ActionBar（操作按钮） ----
+function ActionBar({ hasPaints, onReset, onUndo, onSave }) {
+  return (
+    <div className="flex items-center justify-center gap-2 lg:gap-4 py-2 lg:py-4">
+      <button onClick={onReset} disabled={!hasPaints}
+        className="action-btn flex items-center gap-1.5 lg:gap-2 px-3 lg:px-5 py-2.5 lg:py-3 rounded-xl lg:rounded-2xl font-bold text-xs lg:text-sm shadow-md transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-rose-100 text-rose-600 hover:bg-rose-200 hover:shadow-lg focus:outline-none focus:ring-3 focus:ring-rose-300"
+        title="清空调色盘">
+        <span className="text-base lg:text-lg">🔄</span> <span>重置</span>
+      </button>
+      <button onClick={onUndo} disabled={!hasPaints}
+        className="action-btn flex items-center gap-1.5 lg:gap-2 px-3 lg:px-5 py-2.5 lg:py-3 rounded-xl lg:rounded-2xl font-bold text-xs lg:text-sm shadow-md transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-amber-100 text-amber-600 hover:bg-amber-200 hover:shadow-lg focus:outline-none focus:ring-3 focus:ring-amber-300"
+        title="撤销上一步">
+        <span className="text-base lg:text-lg">↩️</span> <span>撤销</span>
+      </button>
+      <button onClick={onSave} disabled={!hasPaints}
+        className="action-btn flex items-center gap-1.5 lg:gap-2 px-3 lg:px-5 py-2.5 lg:py-3 rounded-xl lg:rounded-2xl font-bold text-xs lg:text-sm shadow-md transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-pink-100 text-pink-600 hover:bg-pink-200 hover:shadow-lg focus:outline-none focus:ring-3 focus:ring-pink-300"
+        title="收藏当前颜色">
+        <span className="text-base lg:text-lg">💝</span> <span>收藏</span>
+      </button>
+    </div>
+  );
+}
+
+// ---- ColorCollection（收藏功能） ----
+function ColorCollection({ savedColors, onRemove }) {
+  const [isExpanded, setIsExpanded] = useState(window.innerWidth >= 768);
+
+  return (
+    <div className="flex flex-col gap-2 p-3 lg:p-4">
+      <button onClick={() => setIsExpanded(!isExpanded)}
+        className="flex items-center justify-between w-full text-left hover:bg-amber-50/50 rounded-xl px-2 py-1 transition-colors">
+        <h2 className="text-base lg:text-lg font-bold text-amber-800">
+          💝 我的收藏
+          {savedColors.length > 0 && (
+            <span className="ml-2 text-xs lg:text-sm font-normal text-amber-500">({savedColors.length})</span>
+          )}
+        </h2>
+        <span className="text-amber-400 text-sm">{isExpanded ? '▲' : '▼'}</span>
+      </button>
+      {isExpanded && (
+        <div className="flex flex-col gap-2 max-h-[150px] lg:max-h-[200px] overflow-y-auto pr-1">
+          {savedColors.length === 0 ? (
+            <div className="bg-white/40 rounded-xl p-3 lg:p-4 text-center">
+              <p className="text-xl lg:text-2xl mb-1">🌟</p>
+              <p className="text-xs text-amber-500/70">还没有收藏颜色哦<br />调出喜欢的颜色后点击收藏吧！</p>
+            </div>
+          ) : (
+            savedColors.map(saved => (
+              <div key={saved.id}
+                className="flex items-center gap-2 lg:gap-3 bg-white/60 backdrop-blur-sm rounded-xl px-2 lg:px-3 py-2 shadow-sm hover:shadow-md transition-shadow group">
+                <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl shadow-md flex-shrink-0 border-2 border-white/50"
+                  style={{ backgroundColor: saved.result.hex, boxShadow: `0 2px 8px ${saved.result.hex}40` }} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs lg:text-sm font-bold text-amber-900 truncate">{saved.result.name}</p>
+                  <p className="text-xs text-amber-500 truncate">{saved.result.recipe}</p>
+                </div>
+                <span className="text-xs font-mono text-gray-400 flex-shrink-0 hidden sm:inline">{saved.result.hex}</span>
+                <button onClick={() => onRemove(saved.id)}
+                  className="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-600 flex items-center justify-center text-xs flex-shrink-0 focus:outline-none active:opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity"
+                  title="删除此收藏">✕</button>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+// ============================================================
+// 主应用组件 App
+// ============================================================
+
+function App() {
+  const [drops, setDrops] = useState([]);
+  const [savedColors, setSavedColors] = useState([]);
+
+  const mixResult = calculateMixResult(drops);
+  const hasPaints = drops.length > 0;
+
+  const handleAddPaint = useCallback(color => {
+    setDrops(prev => [...prev, { color, timestamp: Date.now(), key: `${color.id}-${Date.now()}` }]);
+  }, []);
+
+  const handleUndo = useCallback(() => { setDrops(prev => prev.slice(0, -1)); }, []);
+  const handleReset = useCallback(() => { setDrops([]); }, []);
+
+  const handleSave = useCallback(() => {
+    if (!hasPaints) return;
+    const result = calculateMixResult(drops);
+    setSavedColors(prev => [{
+      id: `saved-${Date.now()}`,
+      result,
+      paints: drops.map(d => d.color),
+      savedAt: Date.now(),
+    }, ...prev]);
+  }, [drops, hasPaints]);
+
+  const handleRemoveSaved = useCallback(id => {
+    setSavedColors(prev => prev.filter(s => s.id !== id));
+  }, []);
+
+  const paintNames = drops.map(d => d.color.name);
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      {/* 顶部标题栏 */}
+      <header className="bg-white/50 backdrop-blur-sm shadow-sm px-4 py-2 lg:px-6 lg:py-3">
+        <div className="flex items-center justify-between max-w-[1280px] mx-auto">
+          <div className="flex items-center gap-2 lg:gap-3">
+            <span className="text-2xl lg:text-3xl">🎨</span>
+            <div>
+              <h1 className="text-lg lg:text-2xl font-black text-amber-900 tracking-wider">小小调色师</h1>
+              <p className="text-xs text-amber-500 font-medium hidden sm:block -mt-0.5">来探索奇妙的颜色世界吧！</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 lg:gap-2">
+            <div className="w-3 h-3 lg:w-4 lg:h-4 rounded-full bg-red-500 shadow-sm" />
+            <span className="text-xs text-amber-600 font-medium">+</span>
+            <div className="w-3 h-3 lg:w-4 lg:h-4 rounded-full bg-yellow-400 shadow-sm" />
+            <span className="text-xs text-amber-600 font-medium">+</span>
+            <div className="w-3 h-3 lg:w-4 lg:h-4 rounded-full bg-blue-500 shadow-sm" />
+            <span className="text-xs text-amber-600 font-medium">=</span>
+            <span className="text-xs text-amber-600 font-bold hidden sm:inline">无限色彩</span>
+          </div>
+        </div>
+      </header>
+
+      {/* 主内容区 */}
+      <main className="flex-1 flex flex-col lg:flex-row lg:items-stretch max-w-[1280px] w-full mx-auto p-3 lg:p-4 gap-3 lg:gap-4">
+        {/* 颜料选择区 */}
+        <aside className="lg:w-[140px] flex-shrink-0 order-1">
+          <div className="bg-white/40 backdrop-blur-sm rounded-2xl lg:rounded-3xl shadow-lg p-2 lg:h-full">
+            <PaintPalette drops={drops} onAddPaint={handleAddPaint} />
+          </div>
+        </aside>
+
+        {/* 调色盘 + 操作按钮 */}
+        <section className="flex-1 flex flex-col gap-3 lg:gap-4 order-2">
+          <div className="bg-white/40 backdrop-blur-sm rounded-2xl lg:rounded-3xl shadow-lg flex-1 flex items-center justify-center min-h-[220px] lg:min-h-0">
+            <MixingBoard drops={drops} mixResult={mixResult} onDropPaint={handleAddPaint} />
+          </div>
+          <ActionBar hasPaints={hasPaints} onReset={handleReset} onUndo={handleUndo} onSave={handleSave} />
+        </section>
+
+        {/* 结果 + 知识 + 收藏 */}
+        <aside className="lg:w-[240px] flex-shrink-0 flex flex-col gap-3 lg:gap-4 order-3">
+          <div className="bg-white/40 backdrop-blur-sm rounded-2xl lg:rounded-3xl shadow-lg">
+            <ColorResult mixResult={mixResult} hasPaints={hasPaints} />
+          </div>
+          <div className="bg-white/40 backdrop-blur-sm rounded-2xl lg:rounded-3xl shadow-lg lg:flex-1">
+            <KnowledgeCard mixHex={mixResult.hex} recipe={mixResult.recipe} paintNames={paintNames} hasPaints={hasPaints} />
+          </div>
+          <div className="bg-white/40 backdrop-blur-sm rounded-2xl lg:rounded-3xl shadow-lg">
+            <ColorCollection savedColors={savedColors} onRemove={handleRemoveSaved} />
+          </div>
+        </aside>
+      </main>
+
+      {/* 底部装饰 */}
+      <footer className="bg-white/30 backdrop-blur-sm py-1.5 lg:py-2 text-center">
+        <p className="text-xs text-amber-400/70 font-medium">🌈 在色彩的世界里，每一次混合都是一次新的发现</p>
+      </footer>
+    </div>
+  );
+}
+
+// ============================================================
+// 渲染
+// ============================================================
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
 </html>
