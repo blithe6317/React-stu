@@ -8,50 +8,49 @@
     /* ===== Reset & Base ===== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html, body {
+    html {
       height: 100%;
       overflow: hidden;
-      position: fixed;
-      width: 100%;
-      touch-action: manipulation;
-      -webkit-overflow-scrolling: touch;
     }
 
     body {
       font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
       background: linear-gradient(135deg, #ffeef8 0%, #fff5e6 40%, #e8f8f5 70%, #fff0f5 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 0;
       color: #5a4a6a;
+      /* Fixed fullscreen — no scroll, no bounce */
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      touch-action: manipulation;
+      -webkit-overflow-scrolling: touch;
+      /* Safe areas */
       padding-top: env(safe-area-inset-top, 0px);
       padding-bottom: env(safe-area-inset-bottom, 0px);
       padding-left: env(safe-area-inset-left, 0px);
       padding-right: env(safe-area-inset-right, 0px);
     }
 
-    /* ===== App Container — full viewport ===== */
+    /* ===== App Container ===== */
     .app-container {
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 100%;
-      height: 100vh;
-      height: 100dvh;
-      padding: 8px 0 max(env(safe-area-inset-bottom, 12px), 12px) 0;
       overflow: hidden;
     }
 
-    /* ===== Header ===== */
+    /* ===== Header (portrait only) ===== */
     .header {
       text-align: center;
-      margin-bottom: 4px;
       flex-shrink: 0;
+      padding: 6px 0 2px;
     }
     .header h1 {
-      font-size: 1.5rem;
+      font-size: clamp(1.1rem, 4vw, 1.5rem);
       font-weight: 800;
       letter-spacing: 3px;
       background: linear-gradient(90deg, #ff7eb3, #ff758c, #ff7eb3, #a18cd1);
@@ -60,32 +59,32 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
       animation: shimmer 3s linear infinite;
-      margin-bottom: 2px;
+      margin-bottom: 1px;
     }
     @keyframes shimmer {
       0% { background-position: 0% center; }
       100% { background-position: 200% center; }
     }
     .header p {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: #b8a0c8;
       letter-spacing: 1px;
     }
 
-    /* ===== Main Card ===== */
+    /* ===== Main Card — the inner layout wrapper ===== */
     .game-card {
       background: rgba(255,255,255,0.7);
       border: 2px solid rgba(255,200,220,0.5);
-      border-radius: 24px;
-      padding: 10px 12px 12px;
+      border-radius: 20px;
       box-shadow: 0 4px 24px rgba(200,150,200,0.15);
       backdrop-filter: blur(10px);
-      width: 100%;
-      max-width: 520px;
       flex: 1 1 auto;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      width: 100%;
+      max-width: 520px;
+      padding: 8px 10px 10px;
     }
 
     /* ===== Top Bar: difficulty + timer ===== */
@@ -93,7 +92,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       gap: 6px;
       flex-wrap: nowrap;
       flex-shrink: 0;
@@ -101,19 +100,20 @@
 
     .difficulty-group {
       display: flex;
-      gap: 5px;
+      gap: 4px;
     }
     .diff-btn {
-      padding: 6px 10px;
+      padding: 5px 9px;
       border-radius: 20px;
       border: 2px solid rgba(255,150,180,0.3);
       background: rgba(255,255,255,0.6);
       color: #a080b0;
-      font-size: 0.78rem;
+      font-size: clamp(0.65rem, 2vw, 0.78rem);
       cursor: pointer;
       transition: all 0.25s;
       font-weight: 600;
       touch-action: manipulation;
+      min-height: 36px;
     }
     .diff-btn:hover { border-color: #ff7eb3; color: #ff7eb3; }
     .diff-btn.active {
@@ -129,13 +129,14 @@
       gap: 5px;
       background: rgba(160,128,176,0.1);
       border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 1.1rem;
+      padding: 5px 12px;
+      font-size: clamp(0.9rem, 3vw, 1.1rem);
       font-weight: 700;
       color: #a18cd1;
       letter-spacing: 2px;
-      min-width: 80px;
+      min-width: 76px;
       justify-content: center;
+      min-height: 36px;
     }
     .timer-icon { font-size: 1rem; }
 
@@ -143,8 +144,9 @@
     .board-wrapper {
       display: flex;
       justify-content: center;
-      margin-bottom: 8px;
+      align-items: center;
       flex-shrink: 0;
+      margin-bottom: 6px;
     }
 
     #sudoku-board {
@@ -154,19 +156,17 @@
       border: 3px solid #d4a0c0;
       border-radius: 12px;
       overflow: hidden;
-      width: min(90vw, calc(90vh - 220px), 460px);
-      height: min(90vw, calc(90vh - 220px), 460px);
+      /* Width/height are set dynamically by JS */
       user-select: none;
       touch-action: manipulation;
-      /* Pastel background */
       background: #fce4ec;
+      flex-shrink: 0;
     }
 
     .cell {
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: clamp(1.05rem, 4vw, 1.5rem);
       font-weight: 700;
       cursor: pointer;
       border-right: 1px solid rgba(200,160,180,0.3);
@@ -175,8 +175,8 @@
       position: relative;
       outline: none;
       touch-action: manipulation;
-      /* Alternating box colors for child-friendly look */
       min-height: 0;
+      /* font-size set by JS based on cell size */
     }
 
     /* 3x3 box background colors — warm pastels */
@@ -245,12 +245,12 @@
       100% { transform: scale(1); }
     }
 
-    /* ===== Action Buttons — two rows ===== */
+    /* ===== Action Buttons ===== */
     .action-bar {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 6px;
-      margin-bottom: 8px;
+      gap: 5px;
+      margin-bottom: 10px;
       flex-shrink: 0;
     }
     .action-btn {
@@ -259,27 +259,25 @@
       align-items: center;
       justify-content: center;
       gap: 2px;
-      padding: 8px 4px;
-      min-height: 48px;
-      border-radius: 16px;
+      padding: 6px 4px;
+      min-height: 44px;
+      border-radius: 14px;
       border: 2px solid rgba(200,160,220,0.35);
       background: rgba(255,255,255,0.7);
       color: #8a6aaa;
-      font-size: 0.72rem;
+      font-size: clamp(0.6rem, 1.8vw, 0.72rem);
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
       touch-action: manipulation;
     }
-    .action-btn .icon { font-size: 1.25rem; }
+    .action-btn .icon { font-size: clamp(1rem, 3vw, 1.25rem); }
     .action-btn:hover {
       border-color: #ff7eb3;
       color: #ff7eb3;
       background: rgba(255,126,179,0.08);
     }
-    .action-btn:active {
-      transform: scale(0.95);
-    }
+    .action-btn:active { transform: scale(0.95); }
     .action-btn.primary {
       background: linear-gradient(135deg, #ff7eb3, #ff758c);
       border-color: transparent;
@@ -300,15 +298,16 @@
     .num-pad {
       display: grid;
       grid-template-columns: repeat(9, 1fr);
-      gap: 5px;
+      gap: 4px;
       flex-shrink: 0;
+      margin-top: 2px;
     }
     .num-btn {
-      height: 50px;
-      border-radius: 14px;
+      height: 44px;
+      border-radius: 12px;
       border: 2px solid transparent;
       color: #fff;
-      font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+      font-size: clamp(1rem, 3.5vw, 1.4rem);
       font-weight: 800;
       cursor: pointer;
       transition: all 0.15s;
@@ -317,7 +316,7 @@
       justify-content: center;
       touch-action: manipulation;
     }
-    /* Rainbow colors for number buttons */
+    /* Rainbow colors */
     .num-btn[data-num="1"] { background: #ff7eb3; }
     .num-btn[data-num="2"] { background: #ff9a76; }
     .num-btn[data-num="3"] { background: #ffd56b; }
@@ -340,10 +339,10 @@
     /* ===== Status Bar ===== */
     .status-bar {
       text-align: center;
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       color: #b0a0c0;
-      min-height: 20px;
-      margin-top: 4px;
+      min-height: 18px;
+      margin-top: 3px;
       flex-shrink: 0;
     }
     .status-bar.error-msg { color: #ff9800; }
@@ -411,40 +410,186 @@
       position: fixed;
       inset: 0;
       pointer-events: none;
-      z-index: 99;
+      z-index: 200;
     }
 
-    /* ===== Responsive ===== */
-    @media (max-height: 680px) {
-      .header h1 { font-size: 1.2rem; margin-bottom: 0; }
-      .header p { display: none; }
-      .header { margin-bottom: 2px; }
-      .game-card { padding: 6px 8px 8px; border-radius: 18px; }
-      .top-bar { margin-bottom: 4px; }
-      .board-wrapper { margin-bottom: 4px; }
-      .action-bar { margin-bottom: 4px; gap: 4px; }
-      .action-btn { padding: 5px 4px; min-height: 42px; border-radius: 12px; }
-      .action-btn .icon { font-size: 1.1rem; }
-      .action-btn span:not(.icon) { font-size: 0.65rem; }
-      .num-pad { gap: 4px; }
-      .num-btn { height: 44px; border-radius: 12px; }
-      .status-bar { margin-top: 2px; min-height: 16px; font-size: 0.75rem; }
+    /* =====================================================
+       PORTRAIT LAYOUT (default — column stacking)
+       ===================================================== */
+    @media (orientation: portrait) {
+      .app-container {
+        flex-direction: column;
+        align-items: center;
+        padding: 0 6px;
+      }
+
+      .header {
+        width: 100%;
+        max-width: none;
+      }
+
+      .game-card {
+        /* fills remaining height after header, remove width cap */
+        flex: 1 1 auto;
+        flex-direction: column;
+        max-width: none;
+      }
+
+      /* In portrait, right-panel inside game-card should show everything */
+      .right-panel { display: contents; }
+      .right-panel .panel-title { display: none; } /* title already in .header */
+
+      /* Portrait: show top-bar under header, hide landscape duplicate */
+      .top-bar-portrait { display: flex; width: 100%; padding: 0 2px; }
+      .top-bar-landscape { display: none !important; }
+
+      .board-wrapper {
+        /* flex-grow pushes board to fill space between top-bar and controls */
+        flex: 1 1 auto;
+        align-items: center;
+      }
     }
 
-    @media (max-height: 580px) {
-      .app-container { padding-top: 4px; }
-      .header { margin-bottom: 0; }
-      .game-card { padding: 4px 6px 6px; }
-      .top-bar { margin-bottom: 2px; }
-      .board-wrapper { margin-bottom: 2px; }
-      .action-btn { padding: 4px 2px; min-height: 38px; }
-      .num-btn { height: 38px; }
+    /* =====================================================
+       LANDSCAPE LAYOUT (side by side)
+       ===================================================== */
+    @media (orientation: landscape) {
+      .app-container {
+        flex-direction: row;
+        align-items: stretch;
+        padding: 0;
+      }
+
+      /* Hide portrait-only header */
+      .header { display: none; }
+
+      /* Landscape: hide portrait top-bar, show landscape one in right-panel */
+      .top-bar-portrait { display: none !important; }
+      .top-bar-landscape { display: flex; }
+
+      .game-card {
+        /* remove portrait card constraints */
+        max-width: none;
+        flex-direction: row;
+        border-radius: 0;
+        border: none;
+        background: transparent;
+        backdrop-filter: none;
+        box-shadow: none;
+        padding: 0;
+        flex: 1 1 auto;
+        overflow: hidden;
+      }
+
+      /* Left: board area */
+      .board-area {
+        flex: 1 1 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px;
+        overflow: hidden;
+      }
+
+      .board-wrapper {
+        margin-bottom: 0;
+        flex-shrink: 0;
+      }
+
+      /* Right: control panel */
+      .right-panel {
+        width: clamp(180px, 28vw, 280px);
+        flex-shrink: 0;
+        display: flex !important;
+        flex-direction: column;
+        align-items: stretch;
+        background: rgba(255,255,255,0.75);
+        backdrop-filter: blur(10px);
+        border-left: 2px solid rgba(255,200,220,0.4);
+        padding: 8px 8px max(env(safe-area-inset-bottom, 8px), 8px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        gap: 6px;
+      }
+
+      /* Panel title visible only in landscape */
+      .panel-title {
+        text-align: center;
+        font-size: clamp(0.85rem, 2vw, 1rem);
+        font-weight: 800;
+        letter-spacing: 2px;
+        background: linear-gradient(90deg, #ff7eb3, #ff758c, #ff7eb3, #a18cd1);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: shimmer 3s linear infinite;
+        flex-shrink: 0;
+      }
+
+      /* In landscape, top-bar, action-bar, num-pad, status are inside right-panel */
+      .top-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+        margin-bottom: 0;
+      }
+
+      .difficulty-group {
+        justify-content: center;
+      }
+
+      .diff-btn {
+        font-size: clamp(0.6rem, 1.6vw, 0.72rem);
+        padding: 4px 7px;
+        min-height: 36px;
+      }
+
+      .timer-box {
+        justify-content: center;
+        font-size: clamp(0.85rem, 2vw, 1rem);
+        padding: 4px 10px;
+        min-height: 34px;
+      }
+
+      .num-pad {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 4px;
+      }
+
+      .num-btn {
+        height: 36px;
+        font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+        border-radius: 10px;
+      }
+
+      .action-bar {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+        margin-bottom: 0;
+      }
+
+      .action-btn {
+        min-height: 44px;
+        font-size: clamp(0.58rem, 1.6vw, 0.7rem);
+        padding: 5px 3px;
+      }
+
+      .action-btn .icon {
+        font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+      }
+
+      .status-bar {
+        font-size: clamp(0.6rem, 1.6vw, 0.72rem);
+        margin-top: 0;
+      }
     }
   </style>
 </head>
 <body>
 
-<!-- Confetti canvas (behind overlay) -->
+<!-- Confetti canvas -->
 <canvas id="confetti-canvas"></canvas>
 
 <!-- Victory Overlay -->
@@ -460,62 +605,85 @@
 <!-- App Container -->
 <div class="app-container">
 
-  <!-- Header -->
+  <!-- Header (portrait only — hidden in landscape via CSS) -->
   <div class="header">
     <h1>🧩 快乐数独</h1>
     <p>Fun Sudoku · 开心玩数独</p>
   </div>
 
+  <!-- Top Bar: difficulty + timer (portrait: under header; landscape: inside right-panel) -->
+  <div class="top-bar top-bar-portrait">
+    <div class="difficulty-group">
+      <button class="diff-btn" data-diff="easy" onclick="setDifficulty('easy')">⭐简单</button>
+      <button class="diff-btn active" data-diff="medium" onclick="setDifficulty('medium')">⭐⭐中等</button>
+      <button class="diff-btn" data-diff="hard" onclick="setDifficulty('hard')">⭐⭐⭐困难</button>
+    </div>
+    <div class="timer-box">
+      <span class="timer-icon">⏱</span>
+      <span id="timer-display">00:00</span>
+    </div>
+  </div>
+
   <!-- Main Card -->
   <div class="game-card">
 
-    <!-- Top Bar -->
-    <div class="top-bar">
-      <div class="difficulty-group">
-        <button class="diff-btn" data-diff="easy" onclick="setDifficulty('easy')">⭐简单</button>
-        <button class="diff-btn active" data-diff="medium" onclick="setDifficulty('medium')">⭐⭐中等</button>
-        <button class="diff-btn" data-diff="hard" onclick="setDifficulty('hard')">⭐⭐⭐困难</button>
-      </div>
-      <div class="timer-box">
-        <span class="timer-icon">⏱</span>
-        <span id="timer-display">00:00</span>
+    <!-- Left: board area (landscape) / inline (portrait) -->
+    <div class="board-area">
+      <!-- Board Wrapper -->
+      <div class="board-wrapper">
+        <div id="sudoku-board"></div>
       </div>
     </div>
 
-    <!-- Sudoku Board -->
-    <div class="board-wrapper">
-      <div id="sudoku-board"></div>
-    </div>
+    <!-- Right Panel (landscape) / inline flow (portrait via display:contents) -->
+    <div class="right-panel">
 
-    <!-- Action Buttons -->
-    <div class="action-bar">
-      <button class="action-btn primary" onclick="newGame()">
-        <span class="icon">🔄</span><span>重新开始</span>
-      </button>
-      <button class="action-btn" onclick="undoMove()">
-        <span class="icon">↩️</span><span>撤销</span>
-      </button>
-      <button class="action-btn" onclick="giveHint()">
-        <span class="icon">💡</span><span>提示</span>
-      </button>
-      <button class="action-btn secondary" onclick="checkBoard()">
-        <span class="icon">🔍</span><span>检查</span>
-      </button>
-      <button class="action-btn" onclick="eraseCell()">
-        <span class="icon">🧹</span><span>擦除</span>
-      </button>
-    </div>
+      <!-- Landscape-only title -->
+      <div class="panel-title">🧩 快乐数独</div>
 
-    <!-- Number Pad -->
-    <div class="num-pad" id="num-pad">
-      <!-- rendered by JS -->
-    </div>
+      <!-- Top Bar for landscape -->
+      <div class="top-bar top-bar-landscape">
+        <div class="difficulty-group">
+          <button class="diff-btn" data-diff="easy" onclick="setDifficulty('easy')">⭐简单</button>
+          <button class="diff-btn active" data-diff="medium" onclick="setDifficulty('medium')">⭐⭐中等</button>
+          <button class="diff-btn" data-diff="hard" onclick="setDifficulty('hard')">⭐⭐⭐困难</button>
+        </div>
+        <div class="timer-box">
+          <span class="timer-icon">⏱</span>
+          <span class="timer-landscape">00:00</span>
+        </div>
+      </div>
 
-    <!-- Status -->
-    <div class="status-bar" id="status-bar">选择一个格子开始游戏 🎯</div>
+      <!-- Number Pad -->
+      <div class="num-pad" id="num-pad">
+        <!-- rendered by JS -->
+      </div>
 
-  </div>
-</div>
+      <!-- Action Buttons -->
+      <div class="action-bar">
+        <button class="action-btn primary" onclick="newGame()">
+          <span class="icon">🔄</span><span>重新开始</span>
+        </button>
+        <button class="action-btn" onclick="undoMove()">
+          <span class="icon">↩️</span><span>撤销</span>
+        </button>
+        <button class="action-btn" onclick="giveHint()">
+          <span class="icon">💡</span><span>提示</span>
+        </button>
+        <button class="action-btn secondary" onclick="checkBoard()">
+          <span class="icon">🔍</span><span>检查</span>
+        </button>
+        <button class="action-btn" onclick="eraseCell()">
+          <span class="icon">🧹</span><span>擦除</span>
+        </button>
+      </div>
+
+      <!-- Status -->
+      <div class="status-bar" id="status-bar">选择一个格子开始游戏 🎯</div>
+
+    </div><!-- /right-panel -->
+  </div><!-- /game-card -->
+</div><!-- /app-container -->
 
 <script>
 /* ==========================================================
@@ -524,7 +692,7 @@
 
 /**
  * Generates a complete valid Sudoku solution using backtracking.
- * @returns {number[][]} 9x9 array (1-9)
+ * @returns {number[][]} 9×9 array (1-9)
  */
 function generateSolution() {
   const board = Array.from({ length: 9 }, () => Array(9).fill(0));
@@ -541,15 +709,8 @@ function generateSolution() {
  * @returns {boolean}
  */
 function isValid(board, row, col, num) {
-  // Check row
-  for (let c = 0; c < 9; c++) {
-    if (board[row][c] === num) return false;
-  }
-  // Check col
-  for (let r = 0; r < 9; r++) {
-    if (board[r][col] === num) return false;
-  }
-  // Check 3x3 box
+  for (let c = 0; c < 9; c++) { if (board[row][c] === num) return false; }
+  for (let r = 0; r < 9; r++) { if (board[r][col] === num) return false; }
   const br = Math.floor(row / 3) * 3;
   const bc = Math.floor(col / 3) * 3;
   for (let r = br; r < br + 3; r++) {
@@ -579,18 +740,17 @@ function solveSudoku(board, randomize = false) {
             board[r][c] = 0;
           }
         }
-        return false; // no valid number found → backtrack
+        return false;
       }
     }
   }
-  return true; // all cells filled
+  return true;
 }
 
 /**
- * Counts the number of solutions for a board (stops at 2 for efficiency).
+ * Counts the number of solutions (stops at 2 for efficiency).
  * @param {number[][]} board
- * @param {{count: number}} result - accumulator
- * @returns {void}
+ * @param {{count: number}} result
  */
 function countSolutions(board, result) {
   if (result.count >= 2) return;
@@ -604,27 +764,22 @@ function countSolutions(board, result) {
             board[r][c] = 0;
           }
         }
-        return; // explored all candidates for this cell
+        return;
       }
     }
   }
-  result.count++; // board fully filled → one solution found
+  result.count++;
 }
 
 /**
- * Generates a puzzle with a unique solution by removing clues from a
- * complete solution.
- * @param {number} clues - number of clues to keep
+ * Generates a puzzle with a unique solution.
+ * @param {number} clues
  * @returns {{ puzzle: number[][], solution: number[][] }}
  */
 function generatePuzzle(clues) {
   const solution = generateSolution();
-  // Deep-copy solution as puzzle
   const puzzle = solution.map(row => [...row]);
-
-  // Build list of all cell indices and shuffle
   const cells = shuffle(Array.from({ length: 81 }, (_, i) => i));
-
   let removed = 0;
   const target = 81 - clues;
 
@@ -635,7 +790,6 @@ function generatePuzzle(clues) {
     const backup = puzzle[r][c];
     puzzle[r][c] = 0;
 
-    // Check uniqueness
     const copy = puzzle.map(row => [...row]);
     const result = { count: 0 };
     countSolutions(copy, result);
@@ -643,15 +797,14 @@ function generatePuzzle(clues) {
     if (result.count === 1) {
       removed++;
     } else {
-      puzzle[r][c] = backup; // restore if not unique
+      puzzle[r][c] = backup;
     }
   }
-
   return { puzzle, solution };
 }
 
 /**
- * Fisher-Yates shuffle (in-place, returns array).
+ * Fisher-Yates shuffle.
  * @template T
  * @param {T[]} arr
  * @returns {T[]}
@@ -669,30 +822,163 @@ function shuffle(arr) {
    ========================================================== */
 
 /** @type {number[][]} */
-let puzzleGrid = [];       // 0 = empty
+let puzzleGrid = [];
 /** @type {number[][]} */
-let solutionGrid = [];     // correct answer
+let solutionGrid = [];
 /** @type {number[][]} */
-let userGrid = [];         // user's current input (0 = empty)
-
+let userGrid = [];
 /** @type {boolean[][]} */
-let givenMask = [];        // true = given (immutable) cell
+let givenMask = [];
 
-/** Currently selected cell */
 let selectedRow = -1;
 let selectedCol = -1;
-
-/** Undo stack: each entry is { r, c, prev, next } */
 let undoStack = [];
-
-/** Difficulty */
 let difficulty = 'medium';
 const CLUE_MAP = { easy: 50, medium: 35, hard: 25 };
 
-/** Timer */
 let timerInterval = null;
 let timerSeconds = 0;
 let gameActive = false;
+
+/* ==========================================================
+   LOCALSTORAGE — save / restore game progress
+   ========================================================== */
+
+const STORAGE_KEY = 'happydoku_save';
+
+/** Save current game state to localStorage */
+function saveProgress() {
+  // Only save if user has made at least one move
+  const hasInput = userGrid.some(row => row.some((v, c) => v !== 0 && !givenMask[userGrid.indexOf(row)][c]));
+  if (!hasInput) return;
+
+  try {
+    const data = {
+      puzzleGrid,
+      solutionGrid,
+      userGrid,
+      givenMask,
+      difficulty,
+      timerSeconds,
+      undoStack,
+      savedAt: Date.now()
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    // localStorage full or unavailable — silently ignore
+  }
+}
+
+/** Try to restore game state from localStorage. Returns true if restored. */
+function restoreProgress() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+
+    const data = JSON.parse(raw);
+    if (!data.puzzleGrid || !data.solutionGrid || !data.userGrid || !data.givenMask) return false;
+
+    puzzleGrid  = data.puzzleGrid;
+    solutionGrid = data.solutionGrid;
+    userGrid    = data.userGrid;
+    givenMask   = data.givenMask;
+    difficulty  = data.difficulty || 'medium';
+    timerSeconds = data.timerSeconds || 0;
+    undoStack   = data.undoStack || [];
+
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+/** Clear saved progress (e.g. on new game or victory) */
+function clearProgress() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
+}
+
+/* ==========================================================
+   RESPONSIVE LAYOUT — board size calculation
+   ========================================================== */
+
+/**
+ * Returns true when the viewport is landscape.
+ * @returns {boolean}
+ */
+function isLandscape() {
+  return window.innerWidth >= window.innerHeight;
+}
+
+/**
+ * Calculates the ideal board pixel size for the current viewport,
+ * then applies it to #sudoku-board and updates all cell font-sizes.
+ *
+ * Portrait:
+ *   boardSize = min(90vw, availableHeight)
+ *   availableHeight = vh - safeTop - safeBottom - headerH - topBarH - actionBarH - numPadH - statusH - gaps
+ *
+ * Landscape:
+ *   rightPanelW = clamp(180, 28vw, 280)
+ *   boardSize = min(100vh - safeTop - safeBottom - padding, 100vw - rightPanelW - padding)
+ */
+function calcBoardSize() {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  // Parse safe areas (default 0 if not supported)
+  const safeTop    = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat') || '0') || 0;
+  const safeBottom = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sab') || '0') || 0;
+
+  let boardPx;
+
+  if (isLandscape()) {
+    // Right panel width
+    const panelW = Math.min(280, Math.max(180, vw * 0.28));
+    const hPad = 12; // total horizontal padding around board
+    const vPad = 12; // total vertical padding
+
+    const maxByWidth  = vw - panelW - hPad;
+    const maxByHeight = vh - safeTop - safeBottom - vPad;
+    boardPx = Math.min(maxByWidth, maxByHeight);
+  } else {
+    // Portrait: measure fixed UI elements
+    const headerEl    = document.querySelector('.header');
+    const topBarEl    = document.querySelector('.top-bar-portrait');
+    const actionBarEl = document.querySelector('.action-bar');
+    const numPadEl    = document.querySelector('.num-pad');
+    const statusEl    = document.querySelector('.status-bar');
+
+    const headerH    = headerEl    ? headerEl.getBoundingClientRect().height    : 44;
+    const topBarH    = topBarEl    ? topBarEl.getBoundingClientRect().height    : 40;
+    const actionBarH = actionBarEl ? actionBarEl.getBoundingClientRect().height : 50;
+    const numPadH    = numPadEl    ? numPadEl.getBoundingClientRect().height    : 46;
+    const statusH    = statusEl    ? statusEl.getBoundingClientRect().height    : 20;
+
+    const gaps  = 8 + 6 + 6 + 6 + 3 + 20 + 20; // container paddings + margins
+    const usedH = safeTop + safeBottom + headerH + topBarH + actionBarH + numPadH + statusH + gaps;
+    const maxByHeight = vh - usedH;
+    const maxByWidth  = vw * 0.95;
+
+    boardPx = Math.min(maxByWidth, Math.max(maxByHeight, vw * 0.60));
+  }
+
+  // Clamp to a reasonable range
+  boardPx = Math.max(boardPx, 120);
+
+  const boardEl = document.getElementById('sudoku-board');
+  if (!boardEl) return;
+
+  boardEl.style.width  = boardPx + 'px';
+  boardEl.style.height = boardPx + 'px';
+
+  // Update font-size for each cell based on actual cell size
+  const cellPx = boardPx / 9;
+  const fontSize = Math.round(cellPx * 0.52); // ~52% of cell height
+  const cells = boardEl.querySelectorAll('.cell');
+  cells.forEach(cell => {
+    cell.style.fontSize = fontSize + 'px';
+  });
+}
 
 /* ==========================================================
    TIMER
@@ -700,7 +986,6 @@ let gameActive = false;
 
 function startTimer() {
   stopTimer();
-  timerSeconds = 0;
   updateTimerDisplay();
   timerInterval = setInterval(() => {
     timerSeconds++;
@@ -719,7 +1004,11 @@ function stopTimer() {
 function updateTimerDisplay() {
   const mm = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
   const ss = String(timerSeconds % 60).padStart(2, '0');
-  document.getElementById('timer-display').textContent = `${mm}:${ss}`;
+  const text = `${mm}:${ss}`;
+  const portrait = document.getElementById('timer-display');
+  const landscape = document.querySelector('.timer-landscape');
+  if (portrait) portrait.textContent = text;
+  if (landscape) landscape.textContent = text;
 }
 
 /* ==========================================================
@@ -739,14 +1028,12 @@ function renderBoard() {
       cell.dataset.box = Math.floor(r / 3) * 3 + Math.floor(c / 3);
       cell.tabIndex = 0;
 
-      // Assign class
       if (givenMask[r][c]) {
         cell.classList.add('given');
         cell.textContent = puzzleGrid[r][c];
       } else if (userGrid[r][c] !== 0) {
         cell.classList.add('user');
         cell.textContent = userGrid[r][c];
-        // Real-time error highlight
         if (userGrid[r][c] !== solutionGrid[r][c]) {
           cell.classList.add('error');
         }
@@ -759,6 +1046,8 @@ function renderBoard() {
 
   applyHighlight();
   renderNumPad();
+  // Apply correct font sizes after DOM is populated
+  calcBoardSize();
 }
 
 /**
@@ -770,7 +1059,6 @@ function updateCellDisplay(r, c) {
   const cell = getCellElement(r, c);
   if (!cell) return;
 
-  // Reset classes (keep positional ones)
   cell.className = 'cell';
   cell.dataset.row = r;
   cell.dataset.col = c;
@@ -787,6 +1075,13 @@ function updateCellDisplay(r, c) {
         cell.classList.add('error');
       }
     }
+  }
+
+  // Re-apply font size to keep it consistent after class reset
+  const boardEl = document.getElementById('sudoku-board');
+  if (boardEl) {
+    const boardPx = boardEl.getBoundingClientRect().width;
+    cell.style.fontSize = Math.round(boardPx / 9 * 0.52) + 'px';
   }
 
   applyHighlight();
@@ -821,12 +1116,9 @@ function applyHighlight() {
       if (r === selectedRow || c === selectedCol || sameBox) {
         cell.classList.add('highlight-group');
       }
-      // Same number highlight
       if (selVal !== 0) {
         const cellVal = givenMask[r][c] ? puzzleGrid[r][c] : userGrid[r][c];
-        if (cellVal === selVal) {
-          cell.classList.add('highlight-same');
-        }
+        if (cellVal === selVal) cell.classList.add('highlight-same');
       }
     }
   });
@@ -840,8 +1132,7 @@ function renderNumPad() {
   const pad = document.getElementById('num-pad');
   pad.innerHTML = '';
 
-  // Count how many of each digit are placed
-  const counts = Array(10).fill(0); // index 1-9
+  const counts = Array(10).fill(0);
   for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
       const v = givenMask[r][c] ? puzzleGrid[r][c] : userGrid[r][c];
@@ -880,28 +1171,23 @@ function inputNumber(num) {
     setStatus('题目给定的数字不可修改哦', 'error');
     return;
   }
-
   const prev = userGrid[selectedRow][selectedCol];
-  if (prev === num) return; // no change
+  if (prev === num) return;
 
-  // Push undo
   undoStack.push({ r: selectedRow, c: selectedCol, prev, next: num });
-
   userGrid[selectedRow][selectedCol] = num;
   updateCellDisplay(selectedRow, selectedCol);
   setStatus('');
 
-  // Play bounce animation on correct input
   if (num === solutionGrid[selectedRow][selectedCol]) {
     const cell = getCellElement(selectedRow, selectedCol);
     if (cell) {
       cell.classList.remove('bounce');
-      // Force reflow to restart animation
       void cell.offsetWidth;
       cell.classList.add('bounce');
     }
   }
-
+  saveProgress();
   checkVictory();
 }
 
@@ -918,6 +1204,7 @@ function eraseCell() {
   userGrid[selectedRow][selectedCol] = 0;
   updateCellDisplay(selectedRow, selectedCol);
   setStatus('');
+  saveProgress();
 }
 
 /* ==========================================================
@@ -927,7 +1214,6 @@ function eraseCell() {
 document.addEventListener('keydown', (e) => {
   if (!gameActive) return;
 
-  // Arrow keys for navigation
   if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
     e.preventDefault();
     let r = selectedRow < 0 ? 0 : selectedRow;
@@ -941,17 +1227,9 @@ document.addEventListener('keydown', (e) => {
   }
 
   const digit = parseInt(e.key);
-  if (digit >= 1 && digit <= 9) {
-    inputNumber(digit);
-    return;
-  }
-  if (e.key === 'Delete' || e.key === 'Backspace') {
-    eraseCell();
-  }
-  if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
-    e.preventDefault();
-    undoMove();
-  }
+  if (digit >= 1 && digit <= 9) { inputNumber(digit); return; }
+  if (e.key === 'Delete' || e.key === 'Backspace') { eraseCell(); }
+  if (e.key === 'z' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); undoMove(); }
 });
 
 /* ==========================================================
@@ -959,46 +1237,32 @@ document.addEventListener('keydown', (e) => {
    ========================================================== */
 
 function undoMove() {
-  if (undoStack.length === 0) {
-    setStatus('没有可撤销的操作', 'error');
-    return;
-  }
+  if (undoStack.length === 0) { setStatus('没有可撤销的操作', 'error'); return; }
   const { r, c, prev } = undoStack.pop();
   userGrid[r][c] = prev;
   selectedRow = r;
   selectedCol = c;
   updateCellDisplay(r, c);
   setStatus('已撤销上一步 ↩️');
+  saveProgress();
 }
 
 function giveHint() {
-  if (selectedRow < 0 || selectedCol < 0) {
-    setStatus('请先选择一个格子 🎯', 'error');
-    return;
-  }
-  if (givenMask[selectedRow][selectedCol]) {
-    setStatus('该格子已是题目给定', 'error');
-    return;
-  }
+  if (selectedRow < 0 || selectedCol < 0) { setStatus('请先选择一个格子 🎯', 'error'); return; }
+  if (givenMask[selectedRow][selectedCol]) { setStatus('该格子已是题目给定', 'error'); return; }
   const correct = solutionGrid[selectedRow][selectedCol];
   const prev = userGrid[selectedRow][selectedCol];
-  if (prev === correct) {
-    setStatus('该格子已经正确啦！', 'success');
-    return;
-  }
+  if (prev === correct) { setStatus('该格子已经正确啦！', 'success'); return; }
+
   undoStack.push({ r: selectedRow, c: selectedCol, prev, next: correct });
   userGrid[selectedRow][selectedCol] = correct;
   updateCellDisplay(selectedRow, selectedCol);
 
-  // Play bounce animation on hint
   const cell = getCellElement(selectedRow, selectedCol);
-  if (cell) {
-    cell.classList.remove('bounce');
-    void cell.offsetWidth;
-    cell.classList.add('bounce');
-  }
+  if (cell) { cell.classList.remove('bounce'); void cell.offsetWidth; cell.classList.add('bounce'); }
 
   setStatus('💡 已填入提示答案', 'success');
+  saveProgress();
   checkVictory();
 }
 
@@ -1006,13 +1270,12 @@ function checkBoard() {
   let errorCount = 0;
   for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
-      if (!givenMask[r][c] && userGrid[r][c] !== 0
-          && userGrid[r][c] !== solutionGrid[r][c]) {
+      if (!givenMask[r][c] && userGrid[r][c] !== 0 && userGrid[r][c] !== solutionGrid[r][c]) {
         errorCount++;
       }
     }
   }
-  renderBoard(); // re-render to show all errors
+  renderBoard();
   if (errorCount === 0) {
     setStatus('✅ 目前没有错误，继续加油！', 'success');
   } else {
@@ -1027,9 +1290,9 @@ function checkVictory() {
       if (val !== solutionGrid[r][c]) return;
     }
   }
-  // All cells match solution!
   stopTimer();
   gameActive = false;
+  clearProgress();
   showVictory();
 }
 
@@ -1042,7 +1305,7 @@ function showVictory() {
   const ss = String(timerSeconds % 60).padStart(2, '0');
   document.getElementById('victory-time-text').textContent = `用时 ${mm}:${ss}`;
   document.getElementById('victory-overlay').classList.add('show');
-  launchConfetti();
+  launchRandomCelebration();
 }
 
 function closeVictory() {
@@ -1052,71 +1315,588 @@ function closeVictory() {
 }
 
 /* ==========================================================
-   CONFETTI
+   VICTORY ANIMATIONS — 10 unique celebrations
    ========================================================== */
 
 let confettiAnimId = null;
-const confettiParticles = [];
+const animParticles = [];
 
-function launchConfetti() {
+function stopConfetti() {
+  if (confettiAnimId) { cancelAnimationFrame(confettiAnimId); confettiAnimId = null; }
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  animParticles.length = 0;
+}
+
+function launchRandomCelebration() {
+  const idx = Math.floor(Math.random() * 10);
   const canvas = document.getElementById('confetti-canvas');
   const ctx = canvas.getContext('2d');
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  confettiParticles.length = 0;
+  animParticles.length = 0;
 
   const colors = ['#ff7eb3','#ff758c','#a18cd1','#ffd56b','#56ccf2','#66bb6a','#ff9a76','#d4a0e0','#56d9b0','#a8e063'];
+  const W = canvas.width, H = canvas.height;
+
+  switch(idx) {
+    case 0: celebrationConfettiRain(ctx, canvas, colors, W, H); break;
+    case 1: celebrationFireworks(ctx, canvas, colors, W, H); break;
+    case 2: celebrationStarBurst(ctx, canvas, colors, W, H); break;
+    case 3: celebrationBunny(ctx, canvas, colors, W, H); break;
+    case 4: celebrationRocket(ctx, canvas, colors, W, H); break;
+    case 5: celebrationRainbow(ctx, canvas, colors, W, H); break;
+    case 6: celebrationBalloons(ctx, canvas, colors, W, H); break;
+    case 7: celebrationFish(ctx, canvas, colors, W, H); break;
+    case 8: celebrationButterfly(ctx, canvas, colors, W, H); break;
+    case 9: celebrationCrown(ctx, canvas, colors, W, H); break;
+  }
+}
+
+/* --- 0. Confetti Rain (classic, looping) --- */
+function celebrationConfettiRain(ctx, canvas, colors, W, H) {
   for (let i = 0; i < 300; i++) {
-    confettiParticles.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height - canvas.height,
-      w: Math.random() * 12 + 6,
-      h: Math.random() * 6 + 4,
+    animParticles.push({
+      x: Math.random() * W, y: Math.random() * H,
+      w: Math.random() * 12 + 6, h: Math.random() * 6 + 4,
       color: colors[Math.floor(Math.random() * colors.length)],
-      angle: Math.random() * Math.PI * 2,
-      spin: (Math.random() - 0.5) * 0.2,
-      vy: Math.random() * 3 + 1.5,
-      vx: (Math.random() - 0.5) * 2.5,
-      shape: Math.random() > 0.5 ? 'rect' : 'circle',
+      angle: Math.random() * Math.PI * 2, spin: (Math.random() - 0.5) * 0.2,
+      vy: Math.random() * 3 + 1.5, vx: (Math.random() - 0.5) * 2.5,
+      shape: Math.random() > 0.5 ? 'rect' : 'circle'
     });
   }
-
   function frame() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    let alive = false;
-    for (const p of confettiParticles) {
-      p.y += p.vy;
-      p.x += p.vx;
-      p.angle += p.spin;
-      if (p.y < canvas.height + 20) alive = true;
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.angle);
-      ctx.fillStyle = p.color;
-      ctx.globalAlpha = 0.9;
-      if (p.shape === 'circle') {
-        ctx.beginPath();
-        ctx.arc(0, 0, p.w / 3, 0, Math.PI * 2);
-        ctx.fill();
-      } else {
-        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-      }
+    ctx.clearRect(0, 0, W, H);
+    for (const p of animParticles) {
+      p.y += p.vy; p.x += p.vx; p.angle += p.spin;
+      // Loop: reset to top when off bottom
+      if (p.y > H + 20) { p.y = -20; p.x = Math.random() * W; }
+      if (p.x < -20) p.x = W + 20;
+      if (p.x > W + 20) p.x = -20;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle);
+      ctx.fillStyle = p.color; ctx.globalAlpha = 0.9;
+      if (p.shape === 'circle') { ctx.beginPath(); ctx.arc(0, 0, p.w / 3, 0, Math.PI * 2); ctx.fill(); }
+      else { ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); }
       ctx.restore();
     }
-    if (alive) confettiAnimId = requestAnimationFrame(frame);
-    else stopConfetti();
+    confettiAnimId = requestAnimationFrame(frame);
   }
   confettiAnimId = requestAnimationFrame(frame);
 }
 
-function stopConfetti() {
-  if (confettiAnimId) {
-    cancelAnimationFrame(confettiAnimId);
-    confettiAnimId = null;
+/* --- 1. Fireworks (explosive bursts, looping) --- */
+function celebrationFireworks(ctx, canvas, colors, W, H) {
+  let burstTimer = 0;
+  const BURST_INTERVAL = 50; // frames between bursts
+  function spawnBurst() {
+    const bx = Math.random() * W * 0.8 + W * 0.1;
+    const by = Math.random() * H * 0.5 + H * 0.1;
+    const c = colors[Math.floor(Math.random() * colors.length)];
+    for (let i = 0; i < 60; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 5 + 2;
+      animParticles.push({
+        x: bx, y: by, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+        color: c, size: Math.random() * 4 + 2, life: 1, decay: Math.random() * 0.015 + 0.01, type: 'dot'
+      });
+    }
   }
-  const canvas = document.getElementById('confetti-canvas');
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Initial burst
+  spawnBurst();
+  function frame() {
+    ctx.clearRect(0, 0, W, H);
+    burstTimer++;
+    if (burstTimer >= BURST_INTERVAL) { spawnBurst(); burstTimer = 0; }
+    for (let i = animParticles.length - 1; i >= 0; i--) {
+      const p = animParticles[i];
+      if (p.type !== 'dot') continue;
+      p.x += p.vx; p.y += p.vy; p.vy += 0.06; p.life -= p.decay;
+      if (p.life > 0) { ctx.globalAlpha = p.life; ctx.fillStyle = p.color;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill(); }
+      else { animParticles.splice(i, 1); }
+    }
+    ctx.globalAlpha = 1;
+    confettiAnimId = requestAnimationFrame(frame);
+  }
+  confettiAnimId = requestAnimationFrame(frame);
+}
+
+/* --- 2. Star Burst (spinning stars flying out, looping) --- */
+function celebrationStarBurst(ctx, canvas, colors, W, H) {
+  for (let i = 0; i < 80; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 4 + 1.5;
+    animParticles.push({
+      x: W / 2, y: H / 2, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      size: Math.random() * 16 + 8, rotation: Math.random() * Math.PI * 2,
+      spin: (Math.random() - 0.5) * 0.15, life: 1, decay: 0.006, type: 'star',
+      initAngle: angle, initSpeed: speed
+    });
+  }
+  function drawStar(cx, cy, r, rot) {
+    ctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a = rot + (i * Math.PI * 2) / 5 - Math.PI / 2;
+      const ax = cx + Math.cos(a) * r, ay = cy + Math.sin(a) * r;
+      const b = rot + ((i + 0.5) * Math.PI * 2) / 5 - Math.PI / 2;
+      const bx = cx + Math.cos(b) * r * 0.4, by = cy + Math.sin(b) * r * 0.4;
+      if (i === 0) ctx.moveTo(ax, ay); else ctx.lineTo(ax, ay);
+      ctx.lineTo(bx, by);
+    }
+    ctx.closePath(); ctx.fill();
+  }
+  function frame() {
+    ctx.clearRect(0, 0, W, H);
+    for (const p of animParticles) {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.02; p.rotation += p.spin; p.life -= p.decay;
+      // Loop: reset star when life runs out
+      if (p.life <= 0) {
+        p.x = W / 2; p.y = H / 2;
+        p.initAngle = Math.random() * Math.PI * 2;
+        p.initSpeed = Math.random() * 4 + 1.5;
+        p.vx = Math.cos(p.initAngle) * p.initSpeed;
+        p.vy = Math.sin(p.initAngle) * p.initSpeed;
+        p.life = 1; p.color = colors[Math.floor(Math.random() * colors.length)];
+      }
+      ctx.globalAlpha = p.life; ctx.fillStyle = p.color;
+      drawStar(p.x, p.y, p.size * p.life, p.rotation);
+    }
+    ctx.globalAlpha = 1;
+    confettiAnimId = requestAnimationFrame(frame);
+  }
+  confettiAnimId = requestAnimationFrame(frame);
+}
+
+/* --- 3. Bunny Hop (cute bunnies jumping across screen, looping) --- */
+function celebrationBunny(ctx, canvas, colors, W, H) {
+  for (let i = 0; i < 12; i++) {
+    animParticles.push({
+      x: -60 - Math.random() * 200, y: H * 0.5 + Math.random() * H * 0.3,
+      vx: Math.random() * 3 + 2, baseY: 0, hopPhase: Math.random() * Math.PI * 2,
+      hopAmp: Math.random() * 40 + 20, color: colors[Math.floor(Math.random() * colors.length)],
+      size: Math.random() * 15 + 20, type: 'bunny'
+    });
+    animParticles[animParticles.length - 1].baseY = animParticles[animParticles.length - 1].y;
+  }
+  for (let i = 0; i < 40; i++) {
+    animParticles.push({
+      x: Math.random() * W, y: Math.random() * H * 0.5,
+      vx: (Math.random() - 0.5) * 1, vy: Math.random() * 1 + 0.5,
+      size: Math.random() * 14 + 8, color: '#ff7eb3', life: 1, decay: 0.005, type: 'heart'
+    });
+  }
+  function drawBunny(x, y, size, color) {
+    // Body
+    ctx.fillStyle = color; ctx.globalAlpha = 0.85;
+    ctx.beginPath(); ctx.ellipse(x, y, size * 0.5, size * 0.6, 0, 0, Math.PI * 2); ctx.fill();
+    // Head
+    ctx.beginPath(); ctx.arc(x, y - size * 0.55, size * 0.35, 0, Math.PI * 2); ctx.fill();
+    // Ears
+    ctx.beginPath(); ctx.ellipse(x - size * 0.15, y - size * 0.95, size * 0.1, size * 0.25, -0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x + size * 0.15, y - size * 0.95, size * 0.1, size * 0.25, 0.2, 0, Math.PI * 2); ctx.fill();
+    // Eyes
+    ctx.fillStyle = '#333'; ctx.globalAlpha = 1;
+    ctx.beginPath(); ctx.arc(x - size * 0.1, y - size * 0.58, size * 0.05, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + size * 0.1, y - size * 0.58, size * 0.05, 0, Math.PI * 2); ctx.fill();
+    // Nose
+    ctx.fillStyle = '#ff9eb3';
+    ctx.beginPath(); ctx.arc(x, y - size * 0.5, size * 0.03, 0, Math.PI * 2); ctx.fill();
+  }
+  function drawHeart(x, y, size) {
+    ctx.save(); ctx.translate(x, y);
+    ctx.beginPath();
+    ctx.moveTo(0, size * 0.3);
+    ctx.bezierCurveTo(-size * 0.5, -size * 0.2, -size * 0.5, -size * 0.6, 0, -size * 0.3);
+    ctx.bezierCurveTo(size * 0.5, -size * 0.6, size * 0.5, -size * 0.2, 0, size * 0.3);
+    ctx.fillStyle = '#ff7eb3'; ctx.globalAlpha = 0.7; ctx.fill();
+    ctx.restore();
+  }
+  let t = 0;
+  function frame() {
+    ctx.clearRect(0, 0, W, H); t += 0.08;
+    for (const p of animParticles) {
+      if (p.type === 'bunny') {
+        p.x += p.vx;
+        p.y = p.baseY - Math.abs(Math.sin(p.hopPhase + t * 2)) * p.hopAmp;
+        // Loop: reset to left when off right
+        if (p.x > W + 60) { p.x = -60; p.color = colors[Math.floor(Math.random() * colors.length)]; }
+        drawBunny(p.x, p.y, p.size, p.color);
+      } else if (p.type === 'heart') {
+        p.x += p.vx; p.y += p.vy; p.life -= p.decay;
+        // Loop: reset heart when life runs out
+        if (p.life <= 0) { p.x = Math.random() * W; p.y = -20; p.life = 1; }
+        drawHeart(p.x, p.y, p.size);
+      }
+    }
+    ctx.globalAlpha = 1;
+    confettiAnimId = requestAnimationFrame(frame);
+  }
+  confettiAnimId = requestAnimationFrame(frame);
+}
+
+/* --- 4. Rocket Launch (rockets flying up with trails, looping) --- */
+function celebrationRocket(ctx, canvas, colors, W, H) {
+  function makeRocket() {
+    return {
+      x: W * 0.15 + Math.random() * W * 0.7, y: H + 20,
+      vy: -(Math.random() * 5 + 4), vx: (Math.random() - 0.5) * 1.5,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      size: Math.random() * 10 + 14, life: 1, type: 'rocket', launched: true,
+      trail: []
+    };
+  }
+  for (let i = 0; i < 8; i++) {
+    animParticles.push(makeRocket());
+  }
+  function drawRocket(x, y, size, color) {
+    ctx.fillStyle = color; ctx.globalAlpha = 0.9;
+    ctx.beginPath(); ctx.moveTo(x, y - size);
+    ctx.lineTo(x - size * 0.3, y + size * 0.3);
+    ctx.lineTo(x + size * 0.3, y + size * 0.3);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#ff758c';
+    ctx.beginPath(); ctx.moveTo(x - size * 0.3, y + size * 0.3);
+    ctx.lineTo(x - size * 0.6, y + size * 0.6); ctx.lineTo(x - size * 0.1, y + size * 0.1); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x + size * 0.3, y + size * 0.3);
+    ctx.lineTo(x + size * 0.6, y + size * 0.6); ctx.lineTo(x + size * 0.1, y + size * 0.1); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.globalAlpha = 0.8;
+    ctx.beginPath(); ctx.arc(x, y - size * 0.2, size * 0.15, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffd56b'; ctx.globalAlpha = 0.8;
+    ctx.beginPath(); ctx.moveTo(x - size * 0.15, y + size * 0.3);
+    ctx.lineTo(x, y + size * 0.7 + Math.random() * size * 0.3);
+    ctx.lineTo(x + size * 0.15, y + size * 0.3); ctx.closePath(); ctx.fill();
+  }
+  function frame() {
+    ctx.clearRect(0, 0, W, H);
+    for (const p of animParticles) {
+      if (p.type === 'rocket' && p.launched) {
+        p.y += p.vy; p.x += p.vx;
+        p.trail.push({ x: p.x, y: p.y + p.size * 0.5, life: 1, size: Math.random() * 4 + 2 });
+        if (p.y > -50) { drawRocket(p.x, p.y, p.size, p.color); }
+        else {
+          // Loop: reset rocket
+          Object.assign(p, makeRocket());
+        }
+      }
+      // Draw trails
+      for (const t of p.trail) {
+        t.life -= 0.03; t.y += 0.5;
+        if (t.life > 0) { ctx.globalAlpha = t.life * 0.6; ctx.fillStyle = '#ffd56b';
+          ctx.beginPath(); ctx.arc(t.x, t.y, t.size, 0, Math.PI * 2); ctx.fill(); }
+      }
+      p.trail = p.trail.filter(t => t.life > 0);
+    }
+    ctx.globalAlpha = 1;
+    confettiAnimId = requestAnimationFrame(frame);
+  }
+  confettiAnimId = requestAnimationFrame(frame);
+}
+
+/* --- 5. Rainbow Wave (rainbow arcs sweeping across, looping) --- */
+function celebrationRainbow(ctx, canvas, colors, W, H) {
+  const rainbowColors = ['#ff0000','#ff7700','#ffff00','#00cc00','#0066ff','#8800cc','#ff66b2'];
+  let t = 0;
+  const sparkles = [];
+  for (let i = 0; i < 50; i++) {
+    sparkles.push({ x: Math.random() * W, y: Math.random() * H, size: Math.random() * 3 + 1, phase: Math.random() * Math.PI * 2 });
+  }
+  function frame() {
+    ctx.clearRect(0, 0, W, H); t += 0.03;
+    // Loop: cycle progress with a sine wave so it fades in and out
+    const cycle = (t % 5) / 5; // 0-1 over 5 seconds
+    const progress = cycle < 0.5 ? cycle * 2 : 2 - cycle * 2; // triangle wave 0→1→0
+    // Draw rainbow arcs
+    for (let i = 0; i < 7; i++) {
+      const r = (7 - i) * 50 * progress + 50;
+      ctx.strokeStyle = rainbowColors[i]; ctx.lineWidth = 12; ctx.globalAlpha = 0.7 * progress;
+      ctx.beginPath(); ctx.arc(W / 2, H * 0.85, r, Math.PI, 0); ctx.stroke();
+    }
+    // Sparkles
+    ctx.globalAlpha = 1;
+    for (const s of sparkles) {
+      const bright = (Math.sin(s.phase + t * 5) + 1) / 2;
+      ctx.fillStyle = '#fff'; ctx.globalAlpha = bright * 0.8;
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.size * bright, 0, Math.PI * 2); ctx.fill();
+    }
+    // Cloud characters at rainbow ends
+    ctx.globalAlpha = progress;
+    drawCloud(ctx, W * 0.15, H * 0.78, 30); drawCloud(ctx, W * 0.85, H * 0.78, 30);
+    confettiAnimId = requestAnimationFrame(frame);
+  }
+  confettiAnimId = requestAnimationFrame(frame);
+}
+function drawCloud(ctx, x, y, size) {
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x - size * 0.7, y + size * 0.2, size * 0.7, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x + size * 0.7, y + size * 0.2, size * 0.7, 0, Math.PI * 2); ctx.fill();
+  // Eyes
+  ctx.fillStyle = '#333';
+  ctx.beginPath(); ctx.arc(x - size * 0.25, y - size * 0.1, size * 0.08, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x + size * 0.25, y - size * 0.1, size * 0.08, 0, Math.PI * 2); ctx.fill();
+  // Smile
+  ctx.strokeStyle = '#333'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(x, y + size * 0.05, size * 0.2, 0.1, Math.PI - 0.1); ctx.stroke();
+}
+
+/* --- 6. Balloon Party (colorful balloons rising, looping) --- */
+function celebrationBalloons(ctx, canvas, colors, W, H) {
+  for (let i = 0; i < 25; i++) {
+    animParticles.push({
+      x: Math.random() * W, y: Math.random() * H,
+      vy: -(Math.random() * 2 + 1.2), vx: (Math.random() - 0.5) * 0.8,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      size: Math.random() * 18 + 22, sway: Math.random() * Math.PI * 2, type: 'balloon'
+    });
+  }
+  function drawBalloon(x, y, size, color) {
+    // Balloon body
+    ctx.fillStyle = color; ctx.globalAlpha = 0.85;
+    ctx.beginPath(); ctx.ellipse(x, y, size * 0.45, size * 0.55, 0, 0, Math.PI * 2); ctx.fill();
+    // Highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.beginPath(); ctx.ellipse(x - size * 0.12, y - size * 0.15, size * 0.12, size * 0.18, -0.3, 0, Math.PI * 2); ctx.fill();
+    // Knot
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.moveTo(x - 3, y + size * 0.52); ctx.lineTo(x, y + size * 0.6); ctx.lineTo(x + 3, y + size * 0.52); ctx.fill();
+    // String
+    ctx.strokeStyle = '#999'; ctx.lineWidth = 1; ctx.globalAlpha = 0.5;
+    ctx.beginPath(); ctx.moveTo(x, y + size * 0.6);
+    ctx.quadraticCurveTo(x + 5, y + size * 0.9, x - 3, y + size * 1.2); ctx.stroke();
+  }
+  let t = 0;
+  function frame() {
+    ctx.clearRect(0, 0, W, H); t += 0.02;
+    for (const p of animParticles) {
+      p.y += p.vy; p.x += p.vx + Math.sin(p.sway + t) * 0.5;
+      // Loop: reset to bottom when off top
+      if (p.y < -80) { p.y = H + 80; p.x = Math.random() * W; p.color = colors[Math.floor(Math.random() * colors.length)]; }
+      drawBalloon(p.x, p.y, p.size, p.color);
+    }
+    ctx.globalAlpha = 1;
+    confettiAnimId = requestAnimationFrame(frame);
+  }
+  confettiAnimId = requestAnimationFrame(frame);
+}
+
+/* --- 7. Fish Swarm (colorful fish swimming across, looping) --- */
+function celebrationFish(ctx, canvas, colors, W, H) {
+  for (let i = 0; i < 18; i++) {
+    const dir = Math.random() > 0.5 ? 1 : -1;
+    animParticles.push({
+      x: dir > 0 ? -50 - Math.random() * 200 : W + 50 + Math.random() * 200,
+      y: H * 0.15 + Math.random() * H * 0.7,
+      vx: dir * (Math.random() * 3 + 1.5), dir: dir,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      size: Math.random() * 12 + 16, wobble: Math.random() * Math.PI * 2, type: 'fish'
+    });
+  }
+  // Bubbles
+  for (let i = 0; i < 30; i++) {
+    animParticles.push({
+      x: Math.random() * W, y: H + Math.random() * 100,
+      vy: -(Math.random() * 1.5 + 0.5), size: Math.random() * 8 + 3,
+      life: 1, decay: 0.005, type: 'bubble'
+    });
+  }
+  function drawFish(x, y, size, color, dir, tailAngle) {
+    ctx.fillStyle = color; ctx.globalAlpha = 0.85;
+    // Body
+    ctx.beginPath(); ctx.ellipse(x, y, size * 0.55, size * 0.3, 0, 0, Math.PI * 2); ctx.fill();
+    // Tail
+    const tx = x - dir * size * 0.55;
+    ctx.beginPath(); ctx.moveTo(tx, y);
+    ctx.lineTo(tx - dir * size * 0.35, y - size * 0.3 + Math.sin(tailAngle) * 4);
+    ctx.lineTo(tx - dir * size * 0.35, y + size * 0.3 + Math.sin(tailAngle) * 4);
+    ctx.closePath(); ctx.fill();
+    // Eye
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x + dir * size * 0.25, y - size * 0.06, size * 0.08, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(x + dir * size * 0.28, y - size * 0.06, size * 0.04, 0, Math.PI * 2); ctx.fill();
+  }
+  let t = 0;
+  function frame() {
+    ctx.clearRect(0, 0, W, H); t += 0.1;
+    for (const p of animParticles) {
+      if (p.type === 'fish') {
+        p.x += p.vx; p.wobble += 0.05;
+        const onScreen = p.dir > 0 ? p.x < W + 80 : p.x > -80;
+        // Loop: reset fish when off screen
+        if (!onScreen) {
+          p.dir = Math.random() > 0.5 ? 1 : -1;
+          p.vx = p.dir * (Math.random() * 3 + 1.5);
+          p.x = p.dir > 0 ? -50 : W + 50;
+          p.y = H * 0.15 + Math.random() * H * 0.7;
+          p.color = colors[Math.floor(Math.random() * colors.length)];
+        }
+        drawFish(p.x, p.y, p.size, p.color, p.dir, t + p.wobble);
+      } else if (p.type === 'bubble') {
+        p.y += p.vy; p.life -= p.decay;
+        // Loop: reset bubble when life runs out
+        if (p.life <= 0) { p.y = H + 20; p.x = Math.random() * W; p.life = 1; }
+        ctx.strokeStyle = '#a18cd1'; ctx.globalAlpha = p.life * 0.4; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1;
+    confettiAnimId = requestAnimationFrame(frame);
+  }
+  confettiAnimId = requestAnimationFrame(frame);
+}
+
+/* --- 8. Butterfly Dance (butterflies fluttering, looping) --- */
+function celebrationButterfly(ctx, canvas, colors, W, H) {
+  for (let i = 0; i < 15; i++) {
+    animParticles.push({
+      x: Math.random() * W, y: H * 0.3 + Math.random() * H * 0.5,
+      vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 1.5,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      size: Math.random() * 14 + 18, wingPhase: Math.random() * Math.PI * 2,
+      wanderPhase: Math.random() * Math.PI * 2, type: 'butterfly'
+    });
+  }
+  const sparkles = [];
+  function drawButterfly(x, y, size, color, wingAngle) {
+    const wing = Math.sin(wingAngle) * 0.6 + 0.7;
+    ctx.fillStyle = color; ctx.globalAlpha = 0.8;
+    // Left wing
+    ctx.save(); ctx.translate(x, y); ctx.scale(wing, 1);
+    ctx.beginPath(); ctx.ellipse(-size * 0.3, -size * 0.1, size * 0.35, size * 0.25, -0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(-size * 0.25, size * 0.15, size * 0.25, size * 0.18, -0.5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    // Right wing
+    ctx.save(); ctx.translate(x, y); ctx.scale(wing, 1);
+    ctx.beginPath(); ctx.ellipse(size * 0.3, -size * 0.1, size * 0.35, size * 0.25, 0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(size * 0.25, size * 0.15, size * 0.25, size * 0.18, 0.5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    // Body
+    ctx.fillStyle = '#555'; ctx.globalAlpha = 0.9;
+    ctx.beginPath(); ctx.ellipse(x, y, size * 0.04, size * 0.25, 0, 0, Math.PI * 2); ctx.fill();
+    // Antennae
+    ctx.strokeStyle = '#555'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x - 2, y - size * 0.2); ctx.lineTo(x - size * 0.15, y - size * 0.4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + 2, y - size * 0.2); ctx.lineTo(x + size * 0.15, y - size * 0.4); ctx.stroke();
+  }
+  let t = 0;
+  function frame() {
+    ctx.clearRect(0, 0, W, H); t += 0.04;
+    for (const p of animParticles) {
+      if (p.type === 'butterfly') {
+        p.wingPhase += 0.2; p.wanderPhase += 0.02;
+        p.x += p.vx + Math.sin(p.wanderPhase) * 0.5;
+        p.y += p.vy + Math.cos(p.wanderPhase * 1.3) * 0.3;
+        // Bounce off edges — already loops naturally
+        if (p.x < 20 || p.x > W - 20) p.vx *= -1;
+        if (p.y < 20 || p.y > H - 20) p.vy *= -1;
+        p.x = Math.max(20, Math.min(W - 20, p.x));
+        p.y = Math.max(20, Math.min(H - 20, p.y));
+        drawButterfly(p.x, p.y, p.size, p.color, p.wingPhase);
+        // Leave sparkle trail
+        if (Math.random() < 0.3) {
+          sparkles.push({ x: p.x, y: p.y, life: 1, size: Math.random() * 3 + 1 });
+        }
+      }
+    }
+    // Draw sparkles
+    for (let i = sparkles.length - 1; i >= 0; i--) {
+      const s = sparkles[i]; s.life -= 0.03;
+      if (s.life <= 0) { sparkles.splice(i, 1); continue; }
+      ctx.fillStyle = '#ffd56b'; ctx.globalAlpha = s.life;
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.size * s.life, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    confettiAnimId = requestAnimationFrame(frame);
+  }
+  confettiAnimId = requestAnimationFrame(frame);
+}
+
+/* --- 9. Crown Celebration (falling crowns + sparkles + chibi face, looping) --- */
+function celebrationCrown(ctx, canvas, colors, W, H) {
+  for (let i = 0; i < 20; i++) {
+    animParticles.push({
+      x: Math.random() * W, y: -30 - Math.random() * 300,
+      vy: Math.random() * 2.5 + 1, vx: (Math.random() - 0.5) * 1.5,
+      size: Math.random() * 16 + 18, rotation: Math.random() * Math.PI * 2,
+      spin: (Math.random() - 0.5) * 0.08,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      type: 'crown'
+    });
+  }
+  // Sparkles
+  for (let i = 0; i < 60; i++) {
+    animParticles.push({
+      x: Math.random() * W, y: Math.random() * H,
+      size: Math.random() * 4 + 1, phase: Math.random() * Math.PI * 2,
+      type: 'sparkle'
+    });
+  }
+  // Big chibi face in center
+  let faceScale = 0;
+  function drawCrown(x, y, size, rot, color) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.fillStyle = '#ffd700'; ctx.globalAlpha = 0.85;
+    ctx.beginPath();
+    const w = size, h = size * 0.6;
+    ctx.moveTo(-w / 2, h / 2);
+    ctx.lineTo(-w / 2, -h / 4); ctx.lineTo(-w / 4, h / 6);
+    ctx.lineTo(0, -h / 2); ctx.lineTo(w / 4, h / 6);
+    ctx.lineTo(w / 2, -h / 4); ctx.lineTo(w / 2, h / 2);
+    ctx.closePath(); ctx.fill();
+    // Gems
+    ctx.fillStyle = color; ctx.globalAlpha = 0.9;
+    ctx.beginPath(); ctx.arc(0, 0, size * 0.08, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(-size * 0.25, size * 0.1, size * 0.05, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(size * 0.25, size * 0.1, size * 0.05, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  function drawChibiFace(scale) {
+    const cx = W / 2, cy = H / 2, r = 60 * scale;
+    if (r < 2) return;
+    // Face
+    ctx.fillStyle = '#fff5e6'; ctx.globalAlpha = 0.9;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#ffcc80'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+    // Blush
+    ctx.fillStyle = 'rgba(255,150,180,0.4)';
+    ctx.beginPath(); ctx.ellipse(cx - r * 0.45, cy + r * 0.2, r * 0.18, r * 0.12, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + r * 0.45, cy + r * 0.2, r * 0.18, r * 0.12, 0, 0, Math.PI * 2); ctx.fill();
+    // Eyes (^_^)
+    ctx.strokeStyle = '#555'; ctx.lineWidth = 2.5 * scale; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(cx - r * 0.25, cy - r * 0.1, r * 0.15, Math.PI + 0.3, -0.3); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx + r * 0.25, cy - r * 0.1, r * 0.15, Math.PI + 0.3, -0.3); ctx.stroke();
+    // Mouth
+    ctx.beginPath(); ctx.arc(cx, cy + r * 0.15, r * 0.15, 0.2, Math.PI - 0.2); ctx.stroke();
+  }
+  let t = 0;
+  function frame() {
+    ctx.clearRect(0, 0, W, H); t += 0.02;
+    const faceScale = Math.min(t * 2, 1);
+    // Crowns — loop: reset when off bottom
+    for (const p of animParticles) {
+      if (p.type === 'crown') {
+        p.y += p.vy; p.x += p.vx; p.rotation += p.spin;
+        if (p.y > H + 60) {
+          p.y = -30; p.x = Math.random() * W;
+          p.color = colors[Math.floor(Math.random() * colors.length)];
+        }
+        drawCrown(p.x, p.y, p.size, p.rotation, p.color);
+      }
+    }
+    // Sparkles
+    for (const p of animParticles) {
+      if (p.type === 'sparkle') {
+        const bright = (Math.sin(p.phase + t * 8) + 1) / 2;
+        ctx.fillStyle = '#ffd56b'; ctx.globalAlpha = bright * 0.7;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (0.5 + bright * 0.5), 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    // Chibi face
+    drawChibiFace(faceScale);
+    ctx.globalAlpha = 1;
+    confettiAnimId = requestAnimationFrame(frame);
+  }
+  confettiAnimId = requestAnimationFrame(frame);
 }
 
 /* ==========================================================
@@ -1134,13 +1914,12 @@ function setDifficulty(diff) {
 function newGame() {
   stopTimer();
   stopConfetti();
+  clearProgress();
   undoStack = [];
   selectedRow = -1;
   selectedCol = -1;
-
   setStatus('生成题目中… 🧩');
 
-  // Use setTimeout to let UI update before heavy computation
   setTimeout(() => {
     const clues = CLUE_MAP[difficulty] || 35;
     const { puzzle, solution } = generatePuzzle(clues);
@@ -1152,7 +1931,7 @@ function newGame() {
       Array.from({ length: 9 }, (__, c) => puzzle[r][c] !== 0)
     );
 
-    renderBoard();
+    renderBoard();  // renderBoard calls calcBoardSize internally
     startTimer();
     setStatus('选择一个格子开始游戏 🎯');
   }, 30);
@@ -1171,11 +1950,39 @@ function setStatus(msg, type = '') {
 }
 
 /* ==========================================================
+   RESPONSIVE RESIZE HANDLER
+   ========================================================== */
+
+let resizeTimer = null;
+
+/**
+ * Debounced handler for window resize / orientation change.
+ * Re-calculates board size after the layout has settled.
+ */
+function onViewportChange() {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    calcBoardSize();
+  }, 80);
+}
+
+window.addEventListener('resize', onViewportChange);
+window.addEventListener('orientationchange', () => {
+  // orientationchange fires before dimensions update — wait a bit longer
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    calcBoardSize();
+  }, 250);
+});
+
+/* ==========================================================
    PREVENT PULL-TO-REFRESH / ELASTIC SCROLL ON MOBILE
    ========================================================== */
 
 document.addEventListener('touchmove', function(e) {
-  if (e.target.closest('#sudoku-board') || e.target.closest('.num-pad') || e.target.closest('.action-bar')) {
+  if (e.target.closest('#sudoku-board')
+    || e.target.closest('.num-pad')
+    || e.target.closest('.action-bar')) {
     e.preventDefault();
   }
 }, { passive: false });
@@ -1183,7 +1990,29 @@ document.addEventListener('touchmove', function(e) {
 /* ==========================================================
    INIT
    ========================================================== */
-newGame();
+
+// Try to restore saved game; if none, start a new one
+if (restoreProgress()) {
+  // Update difficulty buttons to reflect restored difficulty
+  document.querySelectorAll('.diff-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.diff === difficulty);
+  });
+  renderBoard();
+  startTimer();
+  setStatus('继续上次的游戏 💪');
+} else {
+  newGame();
+}
+
+// Periodically save timer progress (every 5 seconds while active)
+setInterval(() => {
+  if (gameActive) saveProgress();
+}, 5000);
+
+// Save on page unload / close
+window.addEventListener('beforeunload', () => {
+  if (gameActive) saveProgress();
+});
 </script>
 </body>
 </html>
